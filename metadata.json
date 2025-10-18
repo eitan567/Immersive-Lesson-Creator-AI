@@ -1,0 +1,5 @@
+{
+  "name": "Immersive Lesson Creator AI",
+  "description": "An AI-powered tool for educators to generate creative and immersive lesson plans on any topic. Users can specify the subject, grade level, and duration to receive a detailed, structured lesson plan with activities, objectives, and immersive experience ideas.",
+  "requestFramePermissions": []
+}
