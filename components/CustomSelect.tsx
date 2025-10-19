@@ -63,7 +63,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     : options;
 
   return (
-    <div className="relative" ref={wrapperRef}>
+    <div className={`relative ${className}`} ref={wrapperRef}>
       {isEditable ? (
         <input
           type="text"
@@ -75,30 +75,30 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           required={required}
           placeholder={placeholder}
           autoComplete="off"
-          className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-right text-gray-800 ${className}`}
+          className="w-full bg-transparent px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-right text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
           onClick={() => setIsOpen(true)}
         />
       ) : (
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex justify-between items-center text-right ${className}`}
+          className="w-full bg-transparent px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex justify-between items-center text-right"
         >
-          <span className="text-gray-800">{value || placeholder}</span>
-          <ChevronDownIcon className={`h-5 w-5 text-gray-500 transition-transform transform ${isOpen ? 'rotate-180' : ''}`} />
+          <span className="text-gray-800 dark:text-gray-200">{value || placeholder}</span>
+          <ChevronDownIcon className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
       )}
 
       {isOpen && (
-        <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+        <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-lg max-h-60 overflow-auto">
           {(isEditable && !filteredOptions.length && inputValue) ? (
-             <li className="px-4 py-2 text-gray-500 text-right">אין תוצאות</li>
+             <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-right">אין תוצאות</li>
           ) : (
             filteredOptions.map((option) => (
                 <li
                 key={option}
                 onClick={() => handleSelectOption(option)}
-                className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-right text-gray-800"
+                className="px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-zinc-950 text-right text-gray-800 dark:text-gray-200"
                 >
                 {option}
                 </li>

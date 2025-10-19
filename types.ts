@@ -1,3 +1,4 @@
+// FIX: Removed self-import of `LessonActivity` which caused a conflict with the local declaration.
 export interface LessonActivity {
   title: string;
   description: string;
@@ -7,7 +8,7 @@ export interface LessonActivity {
 }
 
 export interface LessonPlan {
-  id?: string;
+  id: string;
   topic: string;
   lessonTitle: string;
   targetAudience: string;
@@ -41,6 +42,7 @@ export interface ChatMessage {
 }
 
 export interface LessonFormData {
+  id?: string;
   topic: string;
   gradeLevel: string;
   duration?: string;
@@ -51,4 +53,19 @@ export interface LessonFormData {
   tone?: string;
   successMetrics?: string;
   inclusion?: string;
+}
+
+export interface AppSettings {
+  closeChatOnSuggestion: boolean;
+  chatPosition: 'left' | 'right';
+  isChatFloating: boolean;
+  isChatPinned: boolean;
+  isChatCollapsed: boolean;
+  aiModel: string;
+  generateImages: boolean;
+  theme: 'light' | 'dark' | 'system';
+  _previousChatSettings?: {
+    isChatFloating: boolean;
+    closeChatOnSuggestion: boolean;
+  } | null;
 }

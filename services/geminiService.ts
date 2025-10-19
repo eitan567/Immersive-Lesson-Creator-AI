@@ -146,17 +146,16 @@ const buildPrompt = (formData: LessonFormData, isFile: boolean): string => {
   `;
 };
 
-export const generateLessonPlan = async (formData: LessonFormData): Promise<LessonPlan> => {
+export const generateLessonPlan = async (formData: LessonFormData, aiModel: string, generateImages: boolean): Promise<LessonPlan> => {
   if (!process.env.API_KEY) {
     throw new Error("API key not found. Please set the API_KEY environment variable.");
   }
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  let modelName = "gemini-2.5-flash";
+  let modelName = formData.file ? "gemini-2.5-pro" : aiModel;
   let contents: string | { parts: Part[] };
 
   if (formData.file) {
-    modelName = "gemini-2.5-pro";
     const filePart = await fileToGenerativePart(formData.file);
     const textPart = buildPrompt(formData, true);
     contents = { parts: [filePart, { text: textPart }] };
@@ -179,15 +178,17 @@ export const generateLessonPlan = async (formData: LessonFormData): Promise<Less
     
     lessonPlan.lessonDuration = parseInt(formData.duration || '45', 10);
 
-    const imagePromises = lessonPlan.lessonActivities.map(activity => 
-        generateImageForActivity(ai, activity, lessonPlan.targetAudience)
-    );
-    const imageUrls = await Promise.all(imagePromises);
+    if (generateImages) {
+        const imagePromises = lessonPlan.lessonActivities.map(activity => 
+            generateImageForActivity(ai, activity, lessonPlan.targetAudience)
+        );
+        const imageUrls = await Promise.all(imagePromises);
 
-    lessonPlan.lessonActivities = lessonPlan.lessonActivities.map((activity, index) => ({
-        ...activity,
-        imageUrl: imageUrls[index],
-    }));
+        lessonPlan.lessonActivities = lessonPlan.lessonActivities.map((activity, index) => ({
+            ...activity,
+            imageUrl: imageUrls[index],
+        }));
+    }
     
     return lessonPlan;
   } catch (error) {

@@ -12,6 +12,11 @@ interface DashboardProps {
   onSelectLesson: (lesson: LessonPlan) => void;
   onCreateNew: () => void;
   onCreateQuick: () => void;
+  onNavigateToSettings: () => void;
+  onDelete: (lessonId: string) => void;
+  onPublish: (lessonId: string) => void;
+  onEdit: (lesson: LessonPlan) => void;
+  onNavigateHome: () => void;
 }
 
 const DURATION_OPTIONS = [
@@ -21,7 +26,17 @@ const DURATION_OPTIONS = [
     { value: 'long', label: 'יותר מ-60 דקות' },
 ];
 
-const Dashboard: React.FC<DashboardProps> = ({ lessons, onSelectLesson, onCreateNew, onCreateQuick }) => {
+const Dashboard: React.FC<DashboardProps> = ({ 
+    lessons, 
+    onSelectLesson, 
+    onCreateNew, 
+    onCreateQuick, 
+    onNavigateToSettings,
+    onDelete,
+    onPublish,
+    onEdit,
+    onNavigateHome
+}) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [topicFilter, setTopicFilter] = useState('');
     const [gradeLevelFilter, setGradeLevelFilter] = useState('');
@@ -52,70 +67,79 @@ const Dashboard: React.FC<DashboardProps> = ({ lessons, onSelectLesson, onCreate
     const currentDurationLabel = DURATION_OPTIONS.find(opt => opt.value === durationFilter)?.label || 'כל משך זמן';
 
     return (
-        <div className="bg-gray-50 min-h-screen">
-            <Header />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">סינון שיעורים</h2>
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <input
-                            type="text"
-                            placeholder="חיפוש חופשי..."
-                            className="w-full md:flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <CustomSelect
-                            id="topic-filter"
-                            name="topicFilter"
-                            value={topicFilter || 'כל הנושאים'}
-                            onChange={(e) => setTopicFilter(e.target.value === 'כל הנושאים' ? '' : e.target.value)}
-                            options={['כל הנושאים', ...LESSON_TOPICS]}
-                            className="w-full md:w-48 bg-gray-50"
-                        />
-                        <CustomSelect
-                            id="grade-level-filter"
-                            name="gradeLevelFilter"
-                            value={gradeLevelFilter || 'כל השכבות'}
-                            onChange={(e) => setGradeLevelFilter(e.target.value === 'כל השכבות' ? '' : e.target.value)}
-                            options={['כל השכבות', ...GRADE_LEVELS]}
-                            className="w-full md:w-48 bg-gray-50"
-                        />
-                        <CustomSelect
-                            id="duration-filter"
-                            name="durationFilter"
-                            value={currentDurationLabel}
-                            onChange={handleDurationChange}
-                            options={DURATION_OPTIONS.map(opt => opt.label)}
-                            className="w-full md:w-48 bg-gray-50"
-                        />
+        <div className="bg-gray-50 dark:bg-zinc-900 min-h-screen">
+            <Header onNavigateHome={onNavigateHome} onNavigateToSettings={onNavigateToSettings} />
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="rounded-xl mb-8">
+                    <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-sm">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">סינון שיעורים</h2>
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <input
+                                type="text"
+                                placeholder="חיפוש חופשי..."
+                                className="w-full md:flex-1 px-4 py-3 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <CustomSelect
+                                id="topic-filter"
+                                name="topicFilter"
+                                value={topicFilter || 'כל הנושאים'}
+                                onChange={(e) => setTopicFilter(e.target.value === 'כל הנושאים' ? '' : e.target.value)}
+                                options={['כל הנושאים', ...LESSON_TOPICS]}
+                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950"
+                            />
+                            <CustomSelect
+                                id="grade-level-filter"
+                                name="gradeLevelFilter"
+                                value={gradeLevelFilter || 'כל השכבות'}
+                                onChange={(e) => setGradeLevelFilter(e.target.value === 'כל השכבות' ? '' : e.target.value)}
+                                options={['כל השכבות', ...GRADE_LEVELS]}
+                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950"
+                            />
+                            <CustomSelect
+                                id="duration-filter"
+                                name="durationFilter"
+                                value={currentDurationLabel}
+                                onChange={handleDurationChange}
+                                options={DURATION_OPTIONS.map(opt => opt.label)}
+                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950"
+                            />
+                        </div>
                     </div>
                 </div>
 
                 {filteredLessons.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredLessons.map(lesson => (
-                            <LessonCard key={lesson.id} lesson={lesson} onSelect={onSelectLesson} />
+                            <LessonCard 
+                                key={lesson.id} 
+                                lesson={lesson} 
+                                onSelect={onSelectLesson}
+                                onDelete={onDelete}
+                                onPublish={onPublish}
+                                onEdit={onEdit}
+                            />
                         ))}
                     </div>
                 ) : (
                     <div className="text-center py-16">
-                        <h3 className="text-2xl font-bold text-gray-700">לא נמצאו שיעורים</h3>
-                        <p className="text-gray-500 mt-2">נסה לשנות את תנאי הסינון או צור שיעור חדש.</p>
+                        <h3 className="text-2xl font-bold text-gray-700 dark:text-gray-200">לא נמצאו שיעורים</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">נסה לשנות את תנאי הסינון או צור שיעור חדש.</p>
                     </div>
                 )}
                 
                 <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button 
                         onClick={onCreateNew}
-                        className="w-full sm:w-auto flex items-center justify-center px-8 py-4 bg-blue-600 text-white text-xl font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
+                        className="btn-cta w-full sm:w-auto flex items-center justify-center px-8 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
                     >
                         <PlusIcon className="w-6 h-6 ml-3" />
                         יצירת שיעור חדש
                     </button>
                      <button 
                         onClick={onCreateQuick}
-                        className="w-full sm:w-auto flex items-center justify-center px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 text-xl font-bold rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
+                        className="btn-cta w-full sm:w-auto flex items-center justify-center px-8 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
                     >
                         <BoltIcon className="w-6 h-6 ml-3" />
                         יצירת שיעור מהיר

@@ -44,3 +44,8 @@ export const TONES = [
   'יצירתי ומעורר השראה',
   'רשמי ואינפורמטיבי'
 ];
+
+export const AI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-pro'
+];

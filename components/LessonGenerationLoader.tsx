@@ -21,15 +21,15 @@ const LessonGenerationLoader: React.FC = () => {
     }, []);
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-50 text-center p-4">
+        <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-zinc-900 text-center p-4">
             <div className="relative mb-8">
-                <div className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
+                <div className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center animate-pulse flex-shrink-0">
                     <SparklesIcon className="w-12 h-12 text-white" />
                 </div>
-                <div className="absolute top-0 left-0 w-24 h-24 border-4 border-blue-200 rounded-full animate-ping"></div>
+                <div className="absolute top-0 left-0 w-24 h-24 border-4 border-blue-200 rounded-full animate-ping flex-shrink-0"></div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">יוצרים עבורך שיעור חווייתי...</h2>
-            <p className="text-xl text-gray-600 transition-opacity duration-500 ease-in-out">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">יוצרים עבורך שיעור חווייתי...</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 transition-opacity duration-500 ease-in-out">
                 {loadingMessages[messageIndex]}
             </p>
         </div>
