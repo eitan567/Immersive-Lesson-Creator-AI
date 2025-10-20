@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useContext, useEffect } from 'react';
 import { SettingsContext } from '../contexts/SettingsContext';
 import BookOpenIcon from './icons/BookOpenIcon';
@@ -244,7 +241,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigateHome }) =>
             </header>
 
             {/* Hero Section */}
-            <section className="py-20 md:py-32 text-center bg-white dark:bg-zinc-900">
+            <section className="py-10 md:py-32 text-center bg-white dark:bg-zinc-900">
                 <div className="container mx-auto px-6">
                     <h2 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-gray-50 leading-tight">
                         הפכו כל נושא לחווית למידה <span className="gradient-text">מרתקת</span>
@@ -262,7 +259,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigateHome }) =>
             </section>
 
             {/* Features Section */}
-            <section id="features" className="py-20">
+            <section id="features" className="py-10 md:py-20">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">כל מה שצריך כדי ליצור שיעור מושלם</h2>
@@ -281,7 +278,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigateHome }) =>
             </section>
             
             {/* How It Works Section */}
-            <section id="how-it-works" className="py-20 bg-white dark:bg-zinc-900">
+            <section id="how-it-works" className="py-10 md:py-20 bg-white dark:bg-zinc-900">
                  <div className="container mx-auto px-6">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">יצירת שיעור ב-3 צעדים פשוטים</h2>
@@ -307,7 +304,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigateHome }) =>
             </section>
 
             {/* Testimonials Section */}
-            <section id="testimonials" className="py-20">
+            <section id="testimonials" className="py-10 md:py-20">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">מה אומרים עלינו?</h2>
@@ -333,7 +330,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigateHome }) =>
             </section>
             
             {/* Final CTA Section */}
-            <section className="py-20 bg-white dark:bg-zinc-900">
+            <section className="py-10 md:py-20 bg-white dark:bg-zinc-900">
                  <div className="container mx-auto px-6 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50">מוכנים להפוך את ההוראה שלכם לחוויה?</h2>
                     <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">

@@ -9,7 +9,7 @@ const defaultSettings: AppSettings = {
   isChatPinned: false,
   isChatCollapsed: false,
   aiModel: AI_MODELS[0],
-  generateImages: false,
+  generateImages: true,
   theme: 'light',
 };
 

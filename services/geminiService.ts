@@ -65,15 +65,40 @@ const lessonPlanSchema = {
   ],
 };
 
+const getStyleForGradeLevel = (gradeLevel: string): string => {
+    switch (gradeLevel) {
+        case 'גן ילדים':
+        case 'יסודי (א-ג)':
+            return "Simple, vibrant, colorful, whimsical and fun cartoon style. Engaging and clear for young children.";
+        case 'יסודי (ד-ו)':
+            return "Bright and engaging comic book style illustration. Clear, educational, and dynamic.";
+        case 'חטיבת ביניים':
+            return "Modern digital illustration style. Clean lines, educational, and visually appealing for teenagers.";
+        case 'תיכון':
+            return "Infographic style, clean and schematic. Visually represents the concept clearly and accurately. Minimalist.";
+        case 'אקדמיה':
+            return "Realistic and detailed educational illustration. Schematic or diagrammatic style, professional and informative.";
+        default:
+            return "Clear, engaging, and colorful educational illustration.";
+    }
+};
+
 const generateImageForActivity = async (
     ai: GoogleGenAI,
     activity: LessonActivity,
     gradeLevel: string
 ): Promise<string> => {
-    const prompt = `An educational illustration for a classroom activity for ${gradeLevel}.
-Activity Title: "${activity.title}".
-Description: "${activity.description}".
-Style: Simple, vibrant, colorful, engaging, and clear illustration. Whimsical and fun. No text.`;
+    const style = getStyleForGradeLevel(gradeLevel);
+    const prompt = `Generate a high-quality educational illustration for a "${activity.title}" activity, suitable for the following target audience: **${gradeLevel}**.
+
+**Activity Description (for context only, do not include as text):**
+${activity.description}
+
+**Mandatory Visual Style Guidelines:**
+- The style must be: **${style}**.
+- The image must be perfectly adapted for the specified age group (${gradeLevel}).
+
+**Crucial instruction:** The final image must not contain any text, letters, numbers, or words whatsoever. It must be a purely visual representation.`;
 
     try {
         const response = await ai.models.generateContent({

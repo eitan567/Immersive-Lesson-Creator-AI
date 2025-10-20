@@ -10,6 +10,9 @@ import Settings from './components/Settings';
 import ConfirmModal from './components/ConfirmModal';
 import LandingPage from './components/LandingPage';
 import { SettingsContext } from './contexts/SettingsContext';
+import ExportToCalendarModal from './components/ExportToCalendarModal';
+import CalendarIcon from './components/icons/CalendarIcon';
+import SendIcon from './components/icons/SendIcon';
 
 type AppView = 'landing' | 'dashboard' | 'form' | 'display' | 'loading' | 'settings';
 
@@ -24,6 +27,8 @@ const App: React.FC = () => {
     const [isQuickModalOpen, setIsQuickModalOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [lessonToDelete, setLessonToDelete] = useState<string | null>(null);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const [lessonToExport, setLessonToExport] = useState<LessonPlan | null>(null);
     
      useEffect(() => {
         const root = window.document.documentElement;
@@ -149,6 +154,11 @@ const App: React.FC = () => {
         setView('form');
     };
 
+    const handleExportLesson = (lesson: LessonPlan) => {
+        setLessonToExport(lesson);
+        setIsExportModalOpen(true);
+    };
+
     const handleSubmit = async (formData: LessonFormData) => {
         setIsLoading(true);
         setError(null);
@@ -237,15 +247,23 @@ const App: React.FC = () => {
                     return (
                         <div className="flex flex-col h-screen bg-white dark:bg-zinc-950" dir="rtl">
                              <div className="flex-shrink-0 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
-                                <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+                                <div className="container mx-auto py-4 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">תצוגת שיעור</h2>
                                     <div className="flex items-center gap-4">
+                                        <button
+                                            onClick={() => handleExportLesson(currentLesson)}
+                                            className="flex items-center gap-2 px-4 py-2 text-black dark:text-white text-sm font-semibold rounded-lg transition-colors bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600"
+                                        >
+                                            <CalendarIcon className="w-5 h-5" />
+                                            ייצא ליומן
+                                        </button>
                                         {currentLesson.status === 'טיוטה' && (
                                             <button 
                                                 onClick={() => handlePublishLesson(currentLesson.id)}
-                                                className="px-4 py-2 text-black dark:text-white text-sm font-semibold rounded-lg transition-colors"
+                                                className="flex items-center gap-2 px-4 py-2 text-black dark:text-white text-sm font-semibold rounded-lg transition-colors bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600"
                                             >
-                                                פרסם
+                                            <SendIcon className="w-5 h-5" />
+                                            פרסם
                                             </button>
                                         )}
                                         <button onClick={handleBackToDashboard} className="text-sm font-semibold text-pink-600 hover:underline dark:text-pink-400 dark:hover:text-pink-300">
@@ -255,7 +273,7 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex-grow overflow-y-auto">
-                                <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+                                <div className="container mx-auto">
                                     <LessonDisplay lessonPlan={currentLesson} />
                                 </div>
                             </div>
@@ -294,6 +312,11 @@ const App: React.FC = () => {
                 onClose={() => setIsQuickModalOpen(false)}
                 onSubmit={handleSubmit}
                 isLoading={isLoading}
+             />
+             <ExportToCalendarModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                lesson={lessonToExport}
              />
              <ConfirmModal
                 isOpen={isConfirmModalOpen}

@@ -87,7 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 value={topicFilter || 'כל הנושאים'}
                                 onChange={(e) => setTopicFilter(e.target.value === 'כל הנושאים' ? '' : e.target.value)}
                                 options={['כל הנושאים', ...LESSON_TOPICS]}
-                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950"
+                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950 hidden md:block"
                             />
                             <CustomSelect
                                 id="grade-level-filter"
@@ -95,7 +95,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 value={gradeLevelFilter || 'כל השכבות'}
                                 onChange={(e) => setGradeLevelFilter(e.target.value === 'כל השכבות' ? '' : e.target.value)}
                                 options={['כל השכבות', ...GRADE_LEVELS]}
-                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950"
+                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950 hidden md:block"
                             />
                             <CustomSelect
                                 id="duration-filter"
@@ -103,7 +103,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 value={currentDurationLabel}
                                 onChange={handleDurationChange}
                                 options={DURATION_OPTIONS.map(opt => opt.label)}
-                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950"
+                                className="w-full md:w-48 bg-gray-50 dark:bg-zinc-950 hidden md:block"
                             />
                         </div>
                     </div>

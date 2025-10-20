@@ -39,11 +39,11 @@ const FeatureModal: React.FC<FeatureModalProps> = ({ isOpen, onClose, feature })
                         <XIcon className="w-6 h-6" />
                     </button>
                     
-                    <div className="flex items-center mb-4 pr-8">
+                    <div className="flex items-center mb-4 pl-8">
                         <div className="bg-pink-100 dark:bg-pink-900 text-black dark:text-white p-3 rounded-full ml-4">
                             {feature.icon}
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{feature.title}</h3>
+                        <h3 className="text-xl lg:text-2xl md:text-2xl font-bold text-gray-800 dark:text-gray-100">{feature.title}</h3>
                     </div>
                     
                     <div className="overflow-y-auto pr-2 space-y-6">

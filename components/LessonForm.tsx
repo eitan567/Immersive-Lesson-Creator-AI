@@ -193,10 +193,10 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
   const FormContent = (
       <div className="flex-grow">
         <div className="rounded-2xl">
-          <div className="p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-lg">
+          <div className="bg-white dark:bg-zinc-900">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                  <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{isEditing ? 'עריכת שיעור' : 'יצירת שיעור חדש'}</h2>
+                  <h2 className="text-xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">{isEditing ? 'עריכת שיעור' : 'יצירת שיעור חדש'}</h2>
                   <button
                       type="button"
                       onClick={handleAutoFill}

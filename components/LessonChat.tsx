@@ -12,6 +12,9 @@ import ChevronDoubleRightIcon from './icons/ChevronDoubleRightIcon';
 import AiAvatarIcon from './icons/AiAvatarIcon';
 import UserAvatarIcon from './icons/UserAvatarIcon';
 import ResizeHandleIcon from './icons/ResizeHandleIcon';
+import WindowSmallIcon from './icons/WindowSmallIcon';
+import WindowMediumIcon from './icons/WindowMediumIcon';
+import WindowLargeIcon from './icons/WindowLargeIcon';
 
 interface LessonChatProps {
     isOpen: boolean;
@@ -23,6 +26,8 @@ interface LessonChatProps {
 const MAX_CHARS = 250;
 const MIN_WIDTH = 320;
 const MIN_HEIGHT = 400;
+const DEFAULT_WIDTH = 384;
+const DEFAULT_HEIGHT = 600;
 
 const fieldTranslations: Record<SuggestionField, string> = {
     topic: 'נושא השיעור',
@@ -47,7 +52,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
 
     // Draggable and Resizable state
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [size, setSize] = useState({ width: 384, height: 600 });
+    const [size, setSize] = useState({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT });
     const [isDragging, setIsDragging] = useState(false);
     const [isResizing, setIsResizing] = useState(false);
     const dragStartRef = useRef({ x: 0, y: 0, initialX: 0, initialY: 0 });
@@ -119,6 +124,16 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
             initialHeight: size.height,
             initialY: position.y,
         };
+    };
+    
+    const handleResetSize = () => {
+        setSize({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT });
+    };
+
+    const handleQuickResize = (widthPercent: number, heightPercent: number) => {
+        const newWidth = Math.max(MIN_WIDTH, window.innerWidth * widthPercent);
+        const newHeight = Math.max(MIN_HEIGHT, window.innerHeight * heightPercent);
+        setSize({ width: newWidth, height: newHeight });
     };
 
     useEffect(() => {
@@ -194,8 +209,8 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
     
     const Title = (
         <div className="flex items-center gap-2">
-            <h3 className={`font-bold text-gray-800 dark:text-white ${settings.isChatPinned ? 'text-base' : 'text-lg'}`}>יועץ השיעורים AI</h3>
             <SparklesIcon className={`text-pink-500 dark:text-pink-400 ${settings.isChatPinned ? 'w-5 h-5' : 'w-6 h-6'}`} />
+            <h3 className={`font-bold text-gray-800 dark:text-white ${settings.isChatPinned ? 'text-base' : 'text-lg'}`}>יועץ השיעורים AI</h3>
         </div>
     );
     
@@ -238,9 +253,20 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                     <>
                         {/* Floating Header: Title first for RTL to be on right */}
                         {Title}
-                        <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
-                            <XIcon className="w-6 h-6" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button onClick={handleResetSize} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="גודל ברירת מחדל">
+                                <WindowSmallIcon className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => handleQuickResize(0.4, 0.7)} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="חלון בינוני">
+                                <WindowMediumIcon className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => handleQuickResize(0.6, 0.85)} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="חלון גדול">
+                                <WindowLargeIcon className="w-5 h-5" />
+                            </button>
+                            <button onClick={onClose} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
+                                <XIcon className="w-6 h-6" />
+                            </button>
+                        </div>
                     </>
                 )}
             </header>

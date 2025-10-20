@@ -74,9 +74,9 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
 
     return (
         <div className="bg-gray-50 dark:bg-zinc-900 min-h-screen" dir="rtl">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="rounded-2xl">
-                    <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-lg">
+                    <div className="bg-white dark:bg-zinc-900 pt-0">
                         <div className="flex justify-between items-center mb-8">
                              <div className="flex items-center gap-3">
                                 <CogIcon className="w-8 h-8 text-pink-600 dark:text-pink-400" />
