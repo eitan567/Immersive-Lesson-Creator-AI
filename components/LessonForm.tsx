@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import type { LessonFormData, SuggestionField, ChatMessage, LessonPlan } from '../types';
-import { GRADE_LEVELS, LESSON_TOPICS, TEACHING_STYLES, TONES } from '../constants';
+import { GRADE_LEVELS, LESSON_TOPICS, TEACHING_STYLES, TONES, CATEGORIES, PLACEMENT_IN_CONTENT_OPTIONS, SPACE_USAGE_OPTIONS, SCREEN_TYPES } from '../constants';
 import { generateFullFormSuggestions, generateFieldSuggestion } from '../services/geminiService';
 import SparklesIcon from './icons/SparklesIcon';
 import CustomSelect from './CustomSelect';
@@ -17,7 +17,6 @@ import ChevronDoubleRightIcon from './icons/ChevronDoubleRightIcon';
 interface LessonFormProps {
   onSubmit: (formData: LessonFormData) => void;
   isLoading: boolean;
-  onBack: () => void;
   error?: string | null;
   initialData?: LessonPlan | null;
 }
@@ -31,6 +30,36 @@ interface SuggestionState {
 }
 
 const defaultFormData: LessonFormData = {
+  // New required fields
+  category: '',
+  unitTopic: '',
+
+  // New optional fields
+  priorKnowledge: '',
+  placementInContent: PLACEMENT_IN_CONTENT_OPTIONS[0],
+  contentGoals: '',
+  skillGoals: '',
+  generalDescription: '',
+
+  openingContent: '',
+  openingSpaceUsage: SPACE_USAGE_OPTIONS[0],
+  mainContent: '',
+  mainSpaceUsage: SPACE_USAGE_OPTIONS[0],
+  summaryContent: '',
+  summarySpaceUsage: SPACE_USAGE_OPTIONS[0],
+
+  // Defaulting screens
+  openingScreen1Type: SCREEN_TYPES[0], openingScreen1Desc: '',
+  openingScreen2Type: SCREEN_TYPES[0], openingScreen2Desc: '',
+  openingScreen3Type: SCREEN_TYPES[0], openingScreen3Desc: '',
+  mainScreen1Type: SCREEN_TYPES[0], mainScreen1Desc: '',
+  mainScreen2Type: SCREEN_TYPES[0], mainScreen2Desc: '',
+  mainScreen3Type: SCREEN_TYPES[0], mainScreen3Desc: '',
+  summaryScreen1Type: SCREEN_TYPES[0], summaryScreen1Desc: '',
+  summaryScreen2Type: SCREEN_TYPES[0], summaryScreen2Desc: '',
+  summaryScreen3Type: SCREEN_TYPES[0], summaryScreen3Desc: '',
+
+  // Original fields
   topic: '',
   gradeLevel: GRADE_LEVELS[3],
   duration: '45',
@@ -45,7 +74,71 @@ const defaultFormData: LessonFormData = {
   immersiveExperienceDescription: '',
 };
 
-const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, error, initialData }) => {
+const LessonPartFormSection: React.FC<{
+    partName: 'opening' | 'main' | 'summary';
+    partLabel: string;
+    formData: LessonFormData;
+    handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } }) => void;
+}> = ({ partName, partLabel, formData, handleChange }) => {
+    return (
+        <fieldset className="border border-gray-300 dark:border-zinc-700 p-4 rounded-lg">
+            <legend className="text-xl font-bold text-pink-600 dark:text-pink-400 px-2">{partLabel}</legend>
+            <div className="space-y-4">
+                <div>
+                    <label htmlFor={`${partName}Content`} className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">תוכן</label>
+                    <textarea
+                        id={`${partName}Content`}
+                        name={`${partName}Content`}
+                        value={formData[`${partName}Content` as keyof LessonFormData] as string || ''}
+                        onChange={handleChange}
+                        rows={4}
+                        placeholder={`תאר את הפעילויות והתוכן עבור חלק ה${partLabel}...`}
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                    />
+                </div>
+                <div>
+                    <label htmlFor={`${partName}SpaceUsage`} className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">אופן השימוש במרחב</label>
+                    <CustomSelect
+                        id={`${partName}SpaceUsage`}
+                        name={`${partName}SpaceUsage`}
+                        value={formData[`${partName}SpaceUsage` as keyof LessonFormData] as string || SPACE_USAGE_OPTIONS[0]}
+                        onChange={handleChange}
+                        options={SPACE_USAGE_OPTIONS}
+                        className="bg-gray-50 dark:bg-zinc-800"
+                    />
+                </div>
+                <div>
+                    <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מסכים (עד 3)</label>
+                    <div className="space-y-3">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-zinc-800/50 rounded-md border border-gray-200 dark:border-zinc-700/50">
+                                <CustomSelect
+                                    id={`${partName}Screen${i}Type`}
+                                    name={`${partName}Screen${i}Type`}
+                                    value={formData[`${partName}Screen${i}Type` as keyof LessonFormData] as string || SCREEN_TYPES[0]}
+                                    onChange={handleChange}
+                                    options={SCREEN_TYPES}
+                                    className="bg-white dark:bg-zinc-800"
+                                />
+                                <input
+                                    type="text"
+                                    name={`${partName}Screen${i}Desc`}
+                                    value={formData[`${partName}Screen${i}Desc` as keyof LessonFormData] as string || ''}
+                                    onChange={handleChange}
+                                    placeholder={`תיאור מסך ${i}...`}
+                                    className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    );
+};
+
+
+const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, initialData }) => {
   const { settings, setSettings } = useContext(SettingsContext);
   const [formData, setFormData] = useState<LessonFormData>(defaultFormData);
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -63,10 +156,45 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
         setFormData({
             id: initialData.id,
             topic: initialData.topic,
+            unitTopic: initialData.unitTopic,
+            category: initialData.category,
             gradeLevel: initialData.targetAudience,
             duration: String(initialData.lessonDuration),
-            objectives: initialData.learningObjectives.join('\n'),
+            priorKnowledge: initialData.priorKnowledge,
+            placementInContent: initialData.placementInContent,
+            contentGoals: initialData.contentGoals.join('\n'),
+            skillGoals: initialData.skillGoals.join('\n'),
+            generalDescription: initialData.generalDescription,
+
+            openingContent: initialData.opening.content,
+            openingSpaceUsage: initialData.opening.spaceUsage,
+            openingScreen1Type: initialData.opening.screens[0]?.type || SCREEN_TYPES[0],
+            openingScreen1Desc: initialData.opening.screens[0]?.description || '',
+            openingScreen2Type: initialData.opening.screens[1]?.type || SCREEN_TYPES[0],
+            openingScreen2Desc: initialData.opening.screens[1]?.description || '',
+            openingScreen3Type: initialData.opening.screens[2]?.type || SCREEN_TYPES[0],
+            openingScreen3Desc: initialData.opening.screens[2]?.description || '',
+
+            mainContent: initialData.main.content,
+            mainSpaceUsage: initialData.main.spaceUsage,
+            mainScreen1Type: initialData.main.screens[0]?.type || SCREEN_TYPES[0],
+            mainScreen1Desc: initialData.main.screens[0]?.description || '',
+            mainScreen2Type: initialData.main.screens[1]?.type || SCREEN_TYPES[0],
+            mainScreen2Desc: initialData.main.screens[1]?.description || '',
+            mainScreen3Type: initialData.main.screens[2]?.type || SCREEN_TYPES[0],
+            mainScreen3Desc: initialData.main.screens[2]?.description || '',
+
+            summaryContent: initialData.summary.content,
+            summarySpaceUsage: initialData.summary.spaceUsage,
+            summaryScreen1Type: initialData.summary.screens[0]?.type || SCREEN_TYPES[0],
+            summaryScreen1Desc: initialData.summary.screens[0]?.description || '',
+            summaryScreen2Type: initialData.summary.screens[1]?.type || SCREEN_TYPES[0],
+            summaryScreen2Desc: initialData.summary.screens[1]?.description || '',
+            summaryScreen3Type: initialData.summary.screens[2]?.type || SCREEN_TYPES[0],
+            summaryScreen3Desc: initialData.summary.screens[2]?.description || '',
+
             // These fields are not stored in the lesson plan, so they are reset on edit.
+            objectives: initialData.learningObjectives.join('\n'),
             keyConcepts: '',
             file: null,
             teachingStyle: TEACHING_STYLES[0],
@@ -107,13 +235,13 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
   };
 
   const handleAutoFill = async () => {
-    if (!formData.topic || !formData.gradeLevel) {
-      alert("יש למלא 'נושא השיעור' ו'שכבת גיל' לפני הפעלת המילוי האוטומטי.");
+    if (!formData.unitTopic || !formData.gradeLevel) {
+      alert("יש למלא 'נושא היחידה' ו'שכבת גיל' לפני הפעלת המילוי האוטומטי.");
       return;
     }
     setIsAutoFilling(true);
     try {
-      const suggestions = await generateFullFormSuggestions(formData.topic, formData.gradeLevel);
+      const suggestions = await generateFullFormSuggestions(formData.unitTopic, formData.gradeLevel);
       setFormData(prev => ({ ...prev, ...suggestions }));
     } catch (err) {
       alert(`שגיאה במילוי האוטומטי: ${err instanceof Error ? err.message : 'שגיאה לא ידועה'}`);
@@ -214,9 +342,6 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       )}
                   </button>
               </div>
-              <button onClick={onBack} className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline">
-                &rarr; חזרה למסך הראשי
-              </button>
             </div>
 
             {error && (
@@ -225,209 +350,143 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6">
-              {/* Right Column (First in RTL) */}
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="topic" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    <span>נושא השיעור</span>
-                    <AiSuggestionButton field="topic" title="נושא השיעור" />
-                  </label>
-                  <CustomSelect
-                    id="topic"
-                    name="topic"
-                    value={formData.topic || ''}
-                    onChange={handleChange}
-                    options={LESSON_TOPICS}
-                    className="bg-white dark:bg-zinc-800"
-                    isEditable={true}
-                    required
-                    placeholder="לדוגמה: מערכת השמש"
-                  />
-                </div>
-                
-                <div>
-                    <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        בסס שיעור על קובץ (אופציונלי)
-                    </label>
-                    {formData.file ? (
-                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg">
-                            <span className="text-gray-700 dark:text-gray-200 truncate font-medium">{formData.file.name}</span>
-                            <button type="button" onClick={handleRemoveFile} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
-                                <TrashIcon className="w-5 h-5" />
-                            </button>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Main lesson plan details */}
+              <fieldset className="border border-gray-300 dark:border-zinc-700 p-6 rounded-lg">
+                <legend className="text-2xl font-bold text-pink-600 dark:text-pink-400 px-2">תוכנית השיעור</legend>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6 mt-4">
+                  <div className="space-y-6">
+                      <div>
+                        <label htmlFor="category" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">קטגוריה <span className="text-red-500">*</span></label>
+                        <CustomSelect id="category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} className="bg-gray-50 dark:bg-zinc-800" required />
+                      </div>
+                      <div>
+                        <label htmlFor="unitTopic" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">נושא היחידה <span className="text-red-500">*</span></label>
+                        <input type="text" id="unitTopic" name="unitTopic" value={formData.unitTopic} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required />
+                      </div>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label htmlFor="gradeLevel" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">שכבת גיל</label>
+                            <CustomSelect id="gradeLevel" name="gradeLevel" value={formData.gradeLevel} onChange={handleChange} options={GRADE_LEVELS} className="bg-gray-50 dark:bg-zinc-800" />
+                          </div>
+                          <div>
+                            <label htmlFor="duration" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">זמן כולל (בדקות)</label>
+                            <input type="number" id="duration" name="duration" value={formData.duration} onChange={handleChange} min="10" max="180" step="5" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required />
+                          </div>
                         </div>
-                    ) : (
-                        <>
-                            <label htmlFor="file-upload" className="cursor-pointer w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg hover:border-pink-500 dark:hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-zinc-800 transition-colors">
-                                <PaperClipIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 ml-2" />
-                                <span className="text-gray-700 dark:text-gray-300 font-semibold">לחץ לבחירת קובץ</span>
-                            </label>
-                            <input id="file-upload" name="file" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.txt" />
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">סוגי קבצים נתמכים: PDF, TXT. גודל מקסימלי: 10MB.</p>
-                        </>
-                    )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="gradeLevel" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      שכבת גיל
-                    </label>
-                    <CustomSelect
-                      id="gradeLevel"
-                      name="gradeLevel"
-                      value={formData.gradeLevel}
-                      onChange={handleChange}
-                      options={GRADE_LEVELS}
-                      className="bg-gray-50 dark:bg-zinc-800"
-                    />
+                         <div>
+                            <label htmlFor="placementInContent" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מיקום בתוכן</label>
+                            <CustomSelect id="placementInContent" name="placementInContent" value={formData.placementInContent || ''} onChange={handleChange} options={PLACEMENT_IN_CONTENT_OPTIONS} className="bg-gray-50 dark:bg-zinc-800" />
+                        </div>
                   </div>
-                  <div>
-                    <label htmlFor="duration" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      משך השיעור (בדקות)
-                    </label>
-                    <input
-                      type="number"
-                      id="duration"
-                      name="duration"
-                      value={formData.duration}
-                      onChange={handleChange}
-                      min="10"
-                      max="180"
-                      step="5"
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"
-                      required
-                    />
+                  <div className="space-y-6">
+                     <div>
+                        <label htmlFor="priorKnowledge" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">ידע קודם נדרש</label>
+                        <textarea id="priorKnowledge" name="priorKnowledge" value={formData.priorKnowledge} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
+                      </div>
+                      <div>
+                        <label htmlFor="contentGoals" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מטרות ברמת התוכן</label>
+                        <textarea id="contentGoals" name="contentGoals" value={formData.contentGoals} onChange={handleChange} rows={2} placeholder="מה התלמידים ידעו?" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
+                      </div>
+                      <div>
+                        <label htmlFor="skillGoals" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מטרות ברמת המיומנויות</label>
+                        <textarea id="skillGoals" name="skillGoals" value={formData.skillGoals} onChange={handleChange} rows={2} placeholder="מה התלמידים יוכלו לעשות?" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
+                      </div>
+                      <div>
+                        <label htmlFor="generalDescription" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">תיאור כללי</label>
+                        <textarea id="generalDescription" name="generalDescription" value={formData.generalDescription} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
+                      </div>
                   </div>
                 </div>
+              </fieldset>
 
-                <div>
-                  <label htmlFor="objectives" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    <span>מטרות עיקריות (אופציונלי)</span>
-                    <AiSuggestionButton field="objectives" title="מטרות עיקריות" />
-                  </label>
-                  <textarea
-                    id="objectives"
-                    name="objectives"
-                    value={formData.objectives}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="מה תרצו שהתלמידים ידעו או יוכלו לעשות בסוף השיעור?"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                  ></textarea>
-                </div>
+              {/* Lesson Parts */}
+               <h2 className="text-2xl font-bold text-pink-600 dark:text-pink-400 px-2 text-center">חלקי השיעור</h2>
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <LessonPartFormSection partName="opening" partLabel="פתיחה" formData={formData} handleChange={handleChange} />
+                    <LessonPartFormSection partName="main" partLabel="עיקר" formData={formData} handleChange={handleChange} />
+                    <LessonPartFormSection partName="summary" partLabel="סיכום" formData={formData} handleChange={handleChange} />
+               </div>
 
-                <div>
-                  <label htmlFor="keyConcepts" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    <span>מושגי מפתח (אופציונלי)</span>
-                    <AiSuggestionButton field="keyConcepts" title="מושגי מפתח" />
-                  </label>
-                  <textarea
-                    id="keyConcepts"
-                    name="keyConcepts"
-                    value={formData.keyConcepts}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="מושגים חשובים שתרצו לכלול בשיעור, מופרדים בפסיקים."
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                  ></textarea>
-                </div>
-              </div>
-
-              {/* Left Column (Second in RTL) */}
-              <div className="space-y-6">
-                <div>
-                    <label htmlFor="teachingStyle" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      <span>סגנון הוראה (אופציונלי)</span>
-                      <AiSuggestionButton field="teachingStyle" title="סגנון הוראה" />
-                    </label>
-                    <CustomSelect
-                      id="teachingStyle"
-                      name="teachingStyle"
-                      value={formData.teachingStyle || ''}
-                      onChange={handleChange}
-                      options={TEACHING_STYLES}
-                      className="bg-gray-50 dark:bg-zinc-800"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="tone" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      <span>טון השיעור (אופציונלי)</span>
-                      <AiSuggestionButton field="tone" title="טון השיעור" />
-                    </label>
-                    <CustomSelect
-                      id="tone"
-                      name="tone"
-                      value={formData.tone || ''}
-                      onChange={handleChange}
-                      options={TONES}
-                      className="bg-gray-50 dark:bg-zinc-800"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="successMetrics" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      <span>מדדי הצלחה (אופציונלי)</span>
-                      <AiSuggestionButton field="successMetrics" title="מדדי הצלחה" />
-                    </label>
-                    <textarea
-                      id="successMetrics"
-                      name="successMetrics"
-                      value={formData.successMetrics}
-                      onChange={handleChange}
-                      rows={3}
-                      placeholder="איך תדעו שהשיעור הצליח? (למשל: תלמידים ידעו להסביר, יבנו מודל וכו')"
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                    ></textarea>
-                  </div>
-
-                  <div>
-                    <label htmlFor="inclusion" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      <span>הכללה והתאמות (אופציונלי)</span>
-                      <AiSuggestionButton field="inclusion" title="הכללה והתאמות" />
-                    </label>
-                    <textarea
-                      id="inclusion"
-                      name="inclusion"
-                      value={formData.inclusion}
-                      onChange={handleChange}
-                      rows={3}
-                      placeholder="הערות לגבי התאמת השיעור לתלמידים עם צרכים מיוחדים או רמות שונות."
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                    ></textarea>
-                  </div>
-
-                 <div>
-                    <label htmlFor="immersiveExperienceDescription" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <SparklesIcon className="w-5 h-5 text-pink-500" />
-                        <span>רעיון לחוויה אימרסיבית (אופציונלי)</span>
-                        <AiSuggestionButton field="immersiveExperience" title="רעיון לחוויה אימרסיבית" />
-                    </label>
-                    <div className="space-y-3">
-                        <input
-                        type="text"
-                        id="immersiveExperienceTitle"
-                        name="immersiveExperienceTitle"
-                        value={formData.immersiveExperienceTitle}
-                        onChange={handleChange}
-                        placeholder="כותרת החוויה (למשל: סיור וירטואלי במערכת השמש)"
-                        className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                        />
-                        <textarea
-                        id="immersiveExperienceDescription"
-                        name="immersiveExperienceDescription"
-                        value={formData.immersiveExperienceDescription}
-                        onChange={handleChange}
-                        rows={3}
-                        placeholder="תארו את הרעיון שלכם לחוויה שתכניס את התלמידים לעולם התוכן."
-                        className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                        ></textarea>
+              {/* Additional Details & Legacy fields */}
+              <fieldset className="border border-gray-300 dark:border-zinc-700 p-6 rounded-lg">
+                <legend className="text-2xl font-bold text-pink-600 dark:text-pink-400 px-2">פרטים נוספים (אופציונלי)</legend>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6 mt-4">
+                  <div className="space-y-6">
+                     <div>
+                      <label htmlFor="topic" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span>נושא השיעור (כותרת כללית)</span>
+                        <AiSuggestionButton field="topic" title="נושא השיעור" />
+                      </label>
+                      <CustomSelect id="topic" name="topic" value={formData.topic || ''} onChange={handleChange} options={LESSON_TOPICS} className="bg-white dark:bg-zinc-800" isEditable={true} placeholder="לדוגמה: מערכת השמש" />
                     </div>
-                 </div>
-
-                  <div className="pt-4">
+                     <div>
+                        <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">בסס שיעור על קובץ</label>
+                        {formData.file ? (
+                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg">
+                                <span className="text-gray-700 dark:text-gray-200 truncate font-medium">{formData.file.name}</span>
+                                <button type="button" onClick={handleRemoveFile} className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"><TrashIcon className="w-5 h-5" /></button>
+                            </div>
+                        ) : (
+                            <>
+                                <label htmlFor="file-upload" className="cursor-pointer w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg hover:border-pink-500 dark:hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-zinc-800 transition-colors">
+                                    <PaperClipIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 ml-2" />
+                                    <span className="text-gray-700 dark:text-gray-300 font-semibold">לחץ לבחירת קובץ</span>
+                                </label>
+                                <input id="file-upload" name="file" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.txt" />
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">PDF, TXT. מקסימום 10MB.</p>
+                            </>
+                        )}
+                    </div>
+                     <div>
+                      <label htmlFor="objectives" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span>מטרות עיקריות</span>
+                        <AiSuggestionButton field="objectives" title="מטרות עיקריות" />
+                      </label>
+                      <textarea id="objectives" name="objectives" value={formData.objectives} onChange={handleChange} rows={3} placeholder="מה תרצו שהתלמידים ידעו או יוכלו לעשות בסוף השיעור?" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                    </div>
+                    <div>
+                      <label htmlFor="keyConcepts" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span>מושגי מפתח</span>
+                        <AiSuggestionButton field="keyConcepts" title="מושגי מפתח" />
+                      </label>
+                      <textarea id="keyConcepts" name="keyConcepts" value={formData.keyConcepts} onChange={handleChange} rows={3} placeholder="מושגים חשובים שתרצו לכלול בשיעור, מופרדים בפסיקים." className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                     <div>
+                        <label htmlFor="teachingStyle" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          <span>סגנון הוראה</span>
+                          <AiSuggestionButton field="teachingStyle" title="סגנון הוראה" />
+                        </label>
+                        <CustomSelect id="teachingStyle" name="teachingStyle" value={formData.teachingStyle || ''} onChange={handleChange} options={TEACHING_STYLES} className="bg-gray-50 dark:bg-zinc-800" />
+                      </div>
+                      <div>
+                        <label htmlFor="tone" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          <span>טון השיעור</span>
+                          <AiSuggestionButton field="tone" title="טון השיעור" />
+                        </label>
+                        <CustomSelect id="tone" name="tone" value={formData.tone || ''} onChange={handleChange} options={TONES} className="bg-gray-50 dark:bg-zinc-800" />
+                      </div>
+                      <div>
+                        <label htmlFor="successMetrics" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          <span>מדדי הצלחה</span>
+                          <AiSuggestionButton field="successMetrics" title="מדדי הצלחה" />
+                        </label>
+                        <textarea id="successMetrics" name="successMetrics" value={formData.successMetrics} onChange={handleChange} rows={3} placeholder="איך תדעו שהשיעור הצליח?" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                      </div>
+                      <div>
+                        <label htmlFor="inclusion" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          <span>הכללה והתאמות</span>
+                          <AiSuggestionButton field="inclusion" title="הכללה והתאמות" />
+                        </label>
+                        <textarea id="inclusion" name="inclusion" value={formData.inclusion} onChange={handleChange} rows={3} placeholder="הערות לגבי התאמת השיעור לתלמידים שונים." className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                      </div>
+                  </div>
+                  </div>
+              </fieldset>
+              
+              <div className="pt-4">
                     <button
                       type="submit"
                       disabled={isLoading}
@@ -449,7 +508,6 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       )}
                     </button>
                   </div>
-              </div>
             </form>
           </div>
         </div>

@@ -96,7 +96,8 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
     };
 
     // Draggable handlers
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // FIX: Changed event type from React.MouseEvent<HTMLDivElement> to React.MouseEvent<HTMLElement> to match the <header> element it's attached to.
+    const handleMouseDown = (e: React.MouseEvent<HTMLElement>) => {
         if (!settings.isChatFloating || isResizing) return;
         if ((e.target as HTMLElement).closest('button, input, form')) return;
         
@@ -204,8 +205,6 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
         if (input.length > MAX_CHARS * 0.9) return 'text-yellow-500';
         return 'text-gray-500 dark:text-gray-400';
     };
-
-    if (!isOpen) return null;
     
     const Title = (
         <div className="flex items-center gap-2">
@@ -218,9 +217,9 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
         <>
             <header 
                 className={`relative flex items-center p-4 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 
-                ${!settings.isChatPinned && settings.isChatFloating ? 'cursor-grab' : ''}
+                ${!settings.isChatPinned && settings.isChatFloating ? 'md:cursor-grab' : ''}
                 ${!settings.isChatPinned ? 'justify-between' : 'justify-center'}`}
-                onMouseDown={!settings.isChatPinned ? handleMouseDown : undefined}
+                onMouseDown={!settings.isChatPinned ? (e) => { if (window.innerWidth >= 768) handleMouseDown(e) } : undefined}
             >
                 {settings.isChatPinned ? (
                     <>
@@ -254,15 +253,17 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                         {/* Floating Header: Title first for RTL to be on right */}
                         {Title}
                         <div className="flex items-center gap-2">
-                            <button onClick={handleResetSize} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="גודל ברירת מחדל">
-                                <WindowSmallIcon className="w-5 h-5" />
-                            </button>
-                            <button onClick={() => handleQuickResize(0.4, 0.7)} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="חלון בינוני">
-                                <WindowMediumIcon className="w-5 h-5" />
-                            </button>
-                            <button onClick={() => handleQuickResize(0.6, 0.85)} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="חלון גדול">
-                                <WindowLargeIcon className="w-5 h-5" />
-                            </button>
+                            <div className="hidden md:flex items-center gap-2">
+                                <button onClick={handleResetSize} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="גודל ברירת מחדל">
+                                    <WindowSmallIcon className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => handleQuickResize(0.4, 0.7)} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="חלון בינוני">
+                                    <WindowMediumIcon className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => handleQuickResize(0.6, 0.85)} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-md" title="חלון גדול">
+                                    <WindowLargeIcon className="w-5 h-5" />
+                                </button>
+                            </div>
                             <button onClick={onClose} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
                                 <XIcon className="w-6 h-6" />
                             </button>
@@ -333,7 +334,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                         הפוך לחוויתי
                     </button>
                 </div>
-                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="mx-2 my-4">
+                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="mx-2 my-4 mb-0">
                     <div className="div-cta rounded-full transition-shadow duration-300">
                         <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full">
                             <input
@@ -355,12 +356,14 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                         </div>
                     </div>
                 </form>
-                <div className={`text-left text-xs mt-1.5 pr-3 ${getCounterColor()}`}>
+                <div className={`text-left text-xs mt-1.5 pl-3 ${getCounterColor()}`}>
                     {input.length} / {MAX_CHARS}
                 </div>
             </div>
         </>
     );
+
+    if (!isOpen) return null;
 
     if (settings.isChatPinned) {
         return (
@@ -384,23 +387,46 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
 
 
     return (
-        <div 
-         className={chatContainerClasses}
-         style={chatPositionStyle}
-         dir="rtl"
-        >
-            {ChatContent}
-            {!settings.isChatPinned && (
-                <div
-                    data-role="resize-handle"
-                    onMouseDown={handleResizeMouseDown}
-                    className="absolute bottom-0 left-0 w-6 h-6 p-1 cursor-nesw-resize z-10 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-                    title="שנה גודל"
+       <>
+            {/* Desktop Floating Window */}
+            <div className="hidden md:block">
+                <div 
+                    className={chatContainerClasses}
+                    style={chatPositionStyle}
+                    dir="rtl"
                 >
-                    <ResizeHandleIcon className="w-full h-full -scale-x-100" />
+                    {ChatContent}
+                    {!settings.isChatPinned && (
+                        <div
+                            data-role="resize-handle"
+                            onMouseDown={handleResizeMouseDown}
+                            className="absolute bottom-0 left-0 w-6 h-6 p-1 cursor-nesw-resize z-10 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                            title="שנה גודל"
+                        >
+                            <ResizeHandleIcon className="w-full h-full -scale-x-100" />
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
+            </div>
+
+            {/* Mobile Drawer */}
+            <div className="md:hidden fixed inset-0 z-50" role="dialog" aria-modal="true">
+                {/* Overlay */}
+                <div 
+                    className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                    onClick={onClose}
+                ></div>
+                
+                {/* Drawer Panel */}
+                <div className={`fixed inset-y-0 right-0 flex max-w-full transform transition ease-in-out duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="relative w-screen max-w-sm">
+                        <div className="h-full flex flex-col bg-white dark:bg-zinc-900 shadow-xl">
+                            {ChatContent}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 };
 

@@ -8,11 +8,11 @@ import MoonIcon from './icons/MoonIcon';
 
 
 interface HeaderProps {
-    onNavigateHome: () => void;
+    onNavigateToDashboard: () => void;
     onNavigateToSettings: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToSettings }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigateToDashboard, onNavigateToSettings }) => {
     const { setSettings } = useContext(SettingsContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToSettings })
 
     const navLinks = (
         <>
-            <button onClick={() => handleNavigate(onNavigateHome)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">דף הבית</button>
+            <button onClick={() => handleNavigate(onNavigateToDashboard)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">לוח בקרה</button>
             <button onClick={() => handleNavigate(onNavigateToSettings)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">הגדרות</button>
             <a href="#" onClick={() => setIsMenuOpen(false)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">חומרי עזר</a>
             <a href="#" onClick={() => setIsMenuOpen(false)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">המלצות</a>
@@ -60,22 +60,29 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToSettings })
     return (
         <header className="border-b border-gray-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md sticky top-0 z-40">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center py-4">
-                    <div className="flex items-center cursor-pointer" onClick={() => handleNavigate(onNavigateHome)}>
+                <div className="flex justify-between items-center py-4 md:grid md:grid-cols-3">
+                    {/* Col 1: Logo */}
+                    <div className="flex items-center cursor-pointer md:justify-self-start" onClick={() => handleNavigate(onNavigateToDashboard)}>
                         <BookOpenIcon className="w-8 h-8 text-pink-600 dark:text-pink-400 ml-3" />
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">יוצר השיעורים</h1>
                     </div>
-                    {/* Desktop Nav */}
-                    <nav className="hidden md:flex space-x-6 space-x-reverse items-center text-lg font-semibold text-gray-600 dark:text-gray-300">
+
+                    {/* Col 2: Desktop Nav */}
+                    <nav className="hidden md:flex md:justify-self-center space-x-6 space-x-reverse items-center text-lg font-semibold text-gray-600 dark:text-gray-300">
                         {navLinks}
-                        <ThemeToggleButton />
                     </nav>
-                    {/* Mobile Menu Button */}
-                    <div className="md:hidden flex items-center gap-2">
-                        <ThemeToggleButton />
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 z-50 relative">
-                            {isMenuOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
-                        </button>
+
+                    {/* Col 3: Right side buttons (desktop) and all mobile buttons */}
+                    <div className="md:justify-self-end">
+                        <div className="hidden md:flex items-center">
+                            <ThemeToggleButton />
+                        </div>
+                        <div className="md:hidden flex items-center gap-2">
+                            <ThemeToggleButton />
+                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 z-50 relative">
+                                {isMenuOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

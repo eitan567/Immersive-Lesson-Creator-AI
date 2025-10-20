@@ -1,46 +1,70 @@
 import { GoogleGenAI, Type, Modality, Part } from "@google/genai";
-import type { LessonFormData, LessonPlan, LessonActivity, SuggestionField, ChatMessage, ChatSuggestion } from '../types';
-import { TEACHING_STYLES, TONES } from "../constants";
+import type { LessonFormData, LessonPlan, Screen, LessonPart, SuggestionField, ChatMessage, ChatSuggestion } from '../types';
+import { TEACHING_STYLES, TONES, SCREEN_TYPES, SPACE_USAGE_OPTIONS, PLACEMENT_IN_CONTENT_OPTIONS } from "../constants";
+
+const screenSchema = {
+    type: Type.OBJECT,
+    properties: {
+        type: { type: Type.STRING, enum: SCREEN_TYPES.filter(t => t !== 'בחר סוג') },
+        description: { type: Type.STRING, description: "תיאור מפורט של תוכן המסך והשימוש בו." }
+    },
+    required: ['type', 'description']
+};
+
+const lessonPartSchema = {
+    type: Type.OBJECT,
+    properties: {
+        content: { type: Type.STRING, description: "תיאור מפורט של הפעילויות והתוכן בחלק זה של השיעור." },
+        spaceUsage: { type: Type.STRING, enum: SPACE_USAGE_OPTIONS, description: "אופן השימוש במרחב הלמידה." },
+        screens: {
+            type: Type.ARRAY,
+            items: screenSchema,
+            description: "רשימה של עד 3 מסכים לשימוש בחלק זה. יכול להיות ריק.",
+            maxItems: 3
+        }
+    },
+    required: ['content', 'spaceUsage', 'screens']
+};
 
 const lessonPlanSchema = {
   type: Type.OBJECT,
   properties: {
-    lessonTitle: { type: Type.STRING, description: "כותרת מרתקת ומסקרנת לשיעור." },
-    targetAudience: { type: Type.STRING, description: "קהל היעד של השיעור, כפי שצוין על ידי המשתמש." },
-    lessonDuration: { type: Type.INTEGER, description: "משך השיעור הכולל בדקות, כפי שצוין על ידי המשתמש." },
+    lessonTitle: { type: Type.STRING, description: "כותרת מרתקת ומסקרנת לשיעור, מבוססת על נושא היחידה." },
+    unitTopic: { type: Type.STRING, description: "נושא היחידה כפי שסופק." },
+    category: { type: Type.STRING, description: "הקטגוריה המקצועית של השיעור." },
+    generalDescription: { type: Type.STRING, description: "תיאור כללי ותמציתי של השיעור ומהלכו." },
+    priorKnowledge: { type: Type.STRING, description: "תיאור הידע המקדים הנדרש מהתלמידים." },
+    placementInContent: { type: Type.STRING, description: "מיקום השיעור ברצף הלמידה." },
+    contentGoals: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+        description: "רשימה של 2-3 מטרות תוכן ברורות ומדידות."
+    },
+    skillGoals: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+        description: "רשימה של 1-2 מטרות מיומנות (למשל, עבודת צוות, חשיבה ביקורתית)."
+    },
+    opening: lessonPartSchema,
+    main: lessonPartSchema,
+    summary: lessonPartSchema,
+    targetAudience: { type: Type.STRING, description: "קהל היעד של השיעור (שכבת הגיל)." },
+    lessonDuration: { type: Type.INTEGER, description: "משך השיעור הכולל בדקות." },
     learningObjectives: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: "רשימה של 3-5 מטרות למידה ברורות ומדידות שהתלמידים ישיגו בסוף השיעור."
+      description: "רשימה מסכמת של 3-5 מטרות למידה כלליות (שילוב של תוכן ומיומנויות)."
     },
     materials: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: "רשימת חומרים וציוד הנדרשים לשיעור. יש לכלול גם חומרים דיגיטליים וגם פיזיים."
-    },
-    lessonActivities: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING, description: "שם הפעילות." },
-          description: { type: Type.STRING, description: "הסבר מפורט על הפעילות, מה התלמידים צריכים לעשות." },
-          duration: { type: Type.INTEGER, description: "משך הפעילות בדקות." },
-          type: {
-            type: Type.STRING,
-            enum: ['Introduction', 'Activity', 'Discussion', 'Assessment', 'Conclusion'],
-            description: "סוג הפעילות."
-          },
-        },
-        required: ["title", "description", "duration", "type"],
-      },
-      description: "מערך פעילויות מפורט, מחולק לשלבים הגיוניים (פתיחה, גוף, סיכום)."
+      description: "רשימת חומרים וציוד הנדרשים לשיעור, כולל דיגיטליים ופיזיים."
     },
     immersiveExperienceIdea: {
       type: Type.OBJECT,
       properties: {
         title: { type: Type.STRING, description: "שם רעיון החוויה האימרסיבית." },
-        description: { type: Type.STRING, description: "תיאור מפורט של רעיון יצירתי לחוויה אימרסיבית הקשורה לנושא השיעור (למשל, סימולציה, משחק תפקידים, סיור וירטואלי)." }
+        description: { type: Type.STRING, description: "תיאור מפורט של רעיון יצירתי לחוויה אימרסיבית." }
       },
       required: ["title", "description"],
     },
@@ -48,20 +72,15 @@ const lessonPlanSchema = {
         type: Type.OBJECT,
         properties: {
             title: { type: Type.STRING, description: "שם פעילות ההערכה." },
-            description: { type: Type.STRING, description: "כיצד תיבדק הבנת התלמידים והשגת מטרות הלמידה." }
+            description: { type: Type.STRING, description: "כיצד תיבדק הבנת התלמידים והשגת המטרות." }
         },
         required: ["title", "description"],
     }
   },
   required: [
-    "lessonTitle",
-    "targetAudience",
-    "lessonDuration",
-    "learningObjectives",
-    "materials",
-    "lessonActivities",
-    "immersiveExperienceIdea",
-    "assessment"
+    "lessonTitle", "unitTopic", "category", "generalDescription", "priorKnowledge", "placementInContent",
+    "contentGoals", "skillGoals", "opening", "main", "summary", "targetAudience",
+    "lessonDuration", "learningObjectives", "materials", "immersiveExperienceIdea", "assessment"
   ],
 };
 
@@ -83,16 +102,13 @@ const getStyleForGradeLevel = (gradeLevel: string): string => {
     }
 };
 
-const generateImageForActivity = async (
+const generateImageForScreen = async (
     ai: GoogleGenAI,
-    activity: LessonActivity,
+    description: string,
     gradeLevel: string
 ): Promise<string> => {
     const style = getStyleForGradeLevel(gradeLevel);
-    const prompt = `Generate a high-quality educational illustration for a "${activity.title}" activity, suitable for the following target audience: **${gradeLevel}**.
-
-**Activity Description (for context only, do not include as text):**
-${activity.description}
+    const prompt = `Generate a high-quality educational illustration for a screen described as: "${description}", suitable for the following target audience: **${gradeLevel}**.
 
 **Mandatory Visual Style Guidelines:**
 - The style must be: **${style}**.
@@ -122,7 +138,7 @@ ${activity.description}
         }
         return ''; 
     } catch (error) {
-        console.error(`Error generating image for activity "${activity.title}":`, error);
+        console.error(`Error generating image for screen "${description}":`, error);
         return '';
     }
 };
@@ -147,23 +163,57 @@ const fileToGenerativePart = (file: File): Promise<Part> => {
 
 const buildPrompt = (formData: LessonFormData, isFile: boolean): string => {
   const basePrompt = isFile
-    ? `בהתבסס **אך ורק** על תוכן המסמך המצורף, צור מערך שיעור אימרסיבי ויצירתי.
-       השתמש בשדה 'נושא השיעור' הבא רק עבור הכותרת של מערך השיעור, אך בנה את כל התוכן (מטרות, פעילויות, וכו') מהמסמך.`
+    ? `בהתבסס **אך ורק** על תוכן המסמך המצורף, צור מערך שיעור אימרסיבי ויצירתי.`
     : `צור מערך שיעור אימרסיבי ויצירתי המבוסס על הפרטים הבאים.`;
+
+    const getScreensForPart = (partPrefix: 'opening' | 'main' | 'summary'): string => {
+        let screensText = '';
+        for (let i = 1; i <= 3; i++) {
+            const type = formData[`${partPrefix}Screen${i}Type` as keyof LessonFormData];
+            const desc = formData[`${partPrefix}Screen${i}Desc` as keyof LessonFormData];
+            if (type && desc && type !== 'בחר סוג') {
+                screensText += `- סוג: ${type}, תיאור: ${desc}\n`;
+            }
+        }
+        return screensText || 'לא צוין';
+    }
+
 
   return `
     ${basePrompt}
     התנהג כמומחה לעיצוב הדרכה ופדגוגיה חדשנית.
     הפלט חייב להיות אובייקט JSON התואם לסכמה שסופקה.
+    הקפד למלא את כל השדות בסכמה בצורה מפורטת, יצירתית ומותאמת פדגוגית לקהל היעד. במידת האפשר, שלב 1-2 מסכים מסוג 'תמונה' עם תיאורים עשירים כדי להמחיש מושגים ויזואלית.
 
-    --- פרטי השיעור ---
-    נושא השיעור: ${formData.topic}
+    --- תוכנית השיעור ---
+    קטגוריה: ${formData.category}
+    נושא היחידה: ${formData.unitTopic}
     שכבת גיל: ${formData.gradeLevel}
-    משך השיעור (דקות): ${formData.duration || 45}
-    
-    --- תוכן והנחיות נוספות ---
-    מטרות למידה רצויות: ${formData.objectives || (isFile ? 'יש להגדיר על סמך תוכן המסמך' : 'לא צוין')}
-    מושגי מפתח לכיסוי: ${formData.keyConcepts || (isFile ? 'יש לזהות מתוך תוכן המסמך' : 'לא צוין')}
+    זמן כולל (דקות): ${formData.duration || 45}
+    ידע קודם נדרש: ${formData.priorKnowledge || 'לא צוין'}
+    מיקום בתוכן: ${formData.placementInContent || 'לא צוין'}
+    מטרות ברמת התוכן: ${formData.contentGoals || 'יש להגדיר על סמך נושא היחידה'}
+    מטרות ברמת המיומנויות: ${formData.skillGoals || 'יש להגדיר על סמך נושא היחידה'}
+    תיאור כללי: ${formData.generalDescription || 'יש לכתוב תיאור כללי'}
+
+    --- חלקי השיעור (הנחיות מהמשתמש) ---
+    פתיחה:
+      - תוכן: ${formData.openingContent || 'יש לתכנן פתיחה מסקרנת'}
+      - אופן שימוש במרחב: ${formData.openingSpaceUsage || 'לא צוין'}
+      - מסכים: ${getScreensForPart('opening')}
+    עיקר:
+      - תוכן: ${formData.mainContent || 'יש לתכנן את גוף השיעור עם פעילויות מגוונות'}
+      - אופן שימוש במרחב: ${formData.mainSpaceUsage || 'לא צוין'}
+      - מסכים: ${getScreensForPart('main')}
+    סיכום:
+      - תוכן: ${formData.summaryContent || 'יש לתכנן סיכום ממצה ומשמעותי'}
+      - אופן שימוש במרחב: ${formData.summarySpaceUsage || 'לא צוין'}
+      - מסכים: ${getScreensForPart('summary')}
+
+    --- הנחיות נוספות (שדות מדור קודם) ---
+    נושא השיעור (כותרת כללית): ${formData.topic}
+    מטרות עיקריות נוספות: ${formData.objectives || 'לא צוין'}
+    מושגי מפתח: ${formData.keyConcepts || (isFile ? 'יש לזהות מתוך תוכן המסמך' : 'לא צוין')}
     סגנון הוראה מועדף: ${formData.teachingStyle || 'גמיש'}
     טון השיעור: ${formData.tone || 'ניטרלי'}
     מדדי הצלחה: ${formData.successMetrics || 'לא צוין'}
@@ -203,17 +253,28 @@ export const generateLessonPlan = async (formData: LessonFormData, aiModel: stri
     const lessonPlan: LessonPlan = JSON.parse(jsonText);
     
     lessonPlan.lessonDuration = parseInt(formData.duration || '45', 10);
+    lessonPlan.topic = formData.topic; // Preserve the original topic
 
     if (generateImages) {
-        const imagePromises = lessonPlan.lessonActivities.map(activity => 
-            generateImageForActivity(ai, activity, lessonPlan.targetAudience)
-        );
-        const imageUrls = await Promise.all(imagePromises);
+        const allParts: LessonPart[] = [lessonPlan.opening, lessonPlan.main, lessonPlan.summary];
+        const imagePromises: Promise<void>[] = [];
 
-        lessonPlan.lessonActivities = lessonPlan.lessonActivities.map((activity, index) => ({
-            ...activity,
-            imageUrl: imageUrls[index],
-        }));
+        allParts.forEach(part => {
+            if (part && part.screens) {
+                part.screens.forEach(screen => {
+                    if (screen.type === 'תמונה') {
+                        const promise = generateImageForScreen(ai, screen.description, lessonPlan.targetAudience)
+                            .then(imageUrl => {
+                                if (imageUrl) {
+                                    screen.imageUrl = imageUrl;
+                                }
+                            });
+                        imagePromises.push(promise);
+                    }
+                });
+            }
+        });
+        await Promise.all(imagePromises);
     }
     
     return lessonPlan;
@@ -226,7 +287,7 @@ export const generateLessonPlan = async (formData: LessonFormData, aiModel: stri
   }
 };
 
-export const generateFullFormSuggestions = async (topic: string, gradeLevel: string): Promise<Partial<LessonFormData>> => {
+export const generateFullFormSuggestions = async (unitTopic: string, gradeLevel: string): Promise<Partial<LessonFormData>> => {
     if (!process.env.API_KEY) {
         throw new Error("API key not found.");
     }
@@ -235,6 +296,24 @@ export const generateFullFormSuggestions = async (topic: string, gradeLevel: str
     const suggestionSchema = {
         type: Type.OBJECT,
         properties: {
+            topic: { type: Type.STRING, description: "הצעת כותרת כללית לשיעור, קשורה לנושא היחידה." },
+            priorKnowledge: { type: Type.STRING, description: "טקסט קצר המתאר את הידע המקדים הנדרש מהתלמידים." },
+            placementInContent: { type: Type.STRING, enum: PLACEMENT_IN_CONTENT_OPTIONS, description: "מיקום השיעור המתאים ביותר ברצף הלמידה." },
+            contentGoals: { type: Type.STRING, description: "טקסט המתאר 2-3 מטרות תוכן עיקריות, מופרדות בשורות חדשות." },
+            skillGoals: { type: Type.STRING, description: "טקסט המתאר 1-2 מטרות מיומנות, מופרדות בשורות חדשות." },
+            generalDescription: { type: Type.STRING, description: "תיאור כללי קצר וקולע של מהלך השיעור." },
+            openingContent: { type: Type.STRING, description: "תיאור קצר ומרתק לפעילות פתיחה." },
+            openingSpaceUsage: { type: Type.STRING, enum: SPACE_USAGE_OPTIONS, description: "אופן השימוש במרחב המתאים ביותר לפתיחה." },
+            mainContent: { type: Type.STRING, description: "תיאור קצר לגוף השיעור, כולל רעיון לפעילות מרכזית." },
+            mainSpaceUsage: { type: Type.STRING, enum: SPACE_USAGE_OPTIONS, description: "אופן השימוש במרחב המתאים ביותר לגוף השיעור." },
+            summaryContent: { type: Type.STRING, description: "תיאור קצר לפעילות סיכום משמעותית." },
+            summarySpaceUsage: { type: Type.STRING, enum: SPACE_USAGE_OPTIONS, description: "אופן השימוש במרחב המתאים ביותר לסיכום." },
+            openingScreen1Type: { type: Type.STRING, enum: SCREEN_TYPES.filter(t => t !== 'בחר סוג'), description: "סוג מסך מתאים לפתיחה (למשל 'תמונה' או 'סרטון')." },
+            openingScreen1Desc: { type: Type.STRING, description: "תיאור קצר למסך הפתיחה." },
+            mainScreen1Type: { type: Type.STRING, enum: SCREEN_TYPES.filter(t => t !== 'בחר סוג'), description: "סוג מסך מתאים לגוף השיעור." },
+            mainScreen1Desc: { type: Type.STRING, description: "תיאור קצר למסך גוף השיעור." },
+            summaryScreen1Type: { type: Type.STRING, enum: SCREEN_TYPES.filter(t => t !== 'בחר סוג'), description: "סוג מסך מתאים לסיכום." },
+            summaryScreen1Desc: { type: Type.STRING, description: "תיאור קצר למסך הסיכום." },
             objectives: { type: Type.STRING, description: "טקסט קצר וברור המתאר 2-3 מטרות עיקריות לשיעור." },
             keyConcepts: { type: Type.STRING, description: "רשימה של 3-5 מושגי מפתח עיקריים, מופרדים בפסיקים." },
             teachingStyle: { type: Type.STRING, enum: TEACHING_STYLES, description: "סגנון ההוראה המתאים ביותר לנושא ולגיל." },
@@ -244,19 +323,25 @@ export const generateFullFormSuggestions = async (topic: string, gradeLevel: str
             immersiveExperienceTitle: { type: Type.STRING, description: "כותרת קצרה ומושכת לרעיון החוויה האימרסיבית." },
             immersiveExperienceDescription: { type: Type.STRING, description: "תיאור קצר של רעיון יצירתי לחוויה אימרסיבית." },
         },
-        required: ["objectives", "keyConcepts", "teachingStyle", "tone", "successMetrics", "inclusion", "immersiveExperienceTitle", "immersiveExperienceDescription"],
+        required: [
+            "topic", "priorKnowledge", "placementInContent", "contentGoals", "skillGoals", "generalDescription",
+            "openingContent", "openingSpaceUsage", "mainContent", "mainSpaceUsage", "summaryContent", "summarySpaceUsage",
+            "openingScreen1Type", "openingScreen1Desc", "mainScreen1Type", "mainScreen1Desc", "summaryScreen1Type", "summaryScreen1Desc",
+            "objectives", "keyConcepts", "teachingStyle", "tone", "successMetrics", "inclusion", 
+            "immersiveExperienceTitle", "immersiveExperienceDescription"
+        ],
     };
 
     const prompt = `
-        אתה עוזר פדגוגי יצירתי. המטרה שלך היא למלא טופס ליצירת שיעור.
-        בהינתן נושא השיעור ושכבת הגיל, אנא ספק תוכן מתאים לכל אחד מהשדות הבאים בעברית.
-        התוכן צריך להיות ממוקד, מעשי ומתאים להקשר.
+        אתה עוזר פדגוגי יצירתי. המטרה שלך היא למלא באופן מלא טופס ליצירת שיעור.
+        בהינתן נושא היחידה ושכבת הגיל, אנא ספק תוכן מתאים לכל אחד מהשדות המוגדרים בסכמה בעברית.
+        התוכן צריך להיות ממוקד, מעשי, יצירתי ומתאים להקשר החינוכי. מלא את כל השדות בצורה מקיפה.
 
         --- פרטי השיעור ---
-        נושא השיעור: ${topic}
+        נושא היחידה: ${unitTopic}
         שכבת גיל: ${gradeLevel}
 
-        החזר אובייקט JSON בלבד, שתואם לסכמה. התשובה חייבת להיות בעברית.
+        החזר אובייקט JSON בלבד, שתואם באופן מלא לסכמה. התשובה חייבת להיות בעברית.
     `;
 
     try {

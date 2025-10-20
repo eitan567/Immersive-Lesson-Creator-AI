@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { LessonFormData } from '../types';
-import { GRADE_LEVELS, LESSON_TOPICS } from '../constants';
+import { GRADE_LEVELS, LESSON_TOPICS, CATEGORIES } from '../constants';
 import CustomSelect from './CustomSelect';
 import PaperClipIcon from './icons/PaperClipIcon';
 import TrashIcon from './icons/TrashIcon';
@@ -17,6 +17,8 @@ interface QuickCreateModalProps {
 const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     topic: '',
+    category: '',
+    unitTopic: '',
     gradeLevel: GRADE_LEVELS[3],
     file: null as File | null,
     duration: '45',
@@ -42,21 +44,19 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.topic && !formData.file) {
-        alert("יש להזין נושא שיעור או לבחור קובץ.");
+    if (!formData.unitTopic) {
+        alert("יש להזין נושא יחידה.");
         return;
     }
+     if (!formData.category) {
+        alert("יש לבחור קטגוריה.");
+        return;
+    }
+    
+    // Construct a full LessonFormData object for submission
     const fullFormData: LessonFormData = {
-      topic: formData.topic,
-      gradeLevel: formData.gradeLevel,
-      file: formData.file,
-      duration: formData.duration,
-      objectives: '',
-      keyConcepts: '',
-      teachingStyle: 'אינטראקטיבי ומעורב',
-      tone: 'יצירתי ומעורר השראה',
-      successMetrics: '',
-      inclusion: '',
+      ...formData,
+      topic: formData.topic || formData.unitTopic, // Use unit topic if main topic is empty
     };
     onSubmit(fullFormData);
   };
@@ -72,9 +72,19 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
           </button>
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">יצירת שיעור מהיר</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                <label htmlFor="quick-category" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">קטגוריה <span className="text-red-500">*</span></label>
+                <CustomSelect id="quick-category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} className="bg-gray-50 dark:bg-zinc-800" required />
+              </div>
+               <div>
+                <label htmlFor="quick-unitTopic" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">נושא היחידה <span className="text-red-500">*</span></label>
+                <input type="text" id="quick-unitTopic" name="unitTopic" value={formData.unitTopic} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required />
+              </div>
+            </div>
+             <div>
               <label htmlFor="quick-topic" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                נושא השיעור
+                נושא השיעור (כותרת כללית, אופציונלי)
               </label>
               <CustomSelect
                 id="quick-topic"
@@ -87,7 +97,6 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
                 placeholder="לדוגמה: מערכת השמש"
               />
             </div>
-            
             <div>
                 <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     בסס שיעור על קובץ (אופציונלי)
@@ -109,7 +118,6 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
                     </>
                 )}
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="quick-gradeLevel" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">

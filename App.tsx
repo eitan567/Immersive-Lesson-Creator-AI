@@ -13,8 +13,10 @@ import { SettingsContext } from './contexts/SettingsContext';
 import ExportToCalendarModal from './components/ExportToCalendarModal';
 import CalendarIcon from './components/icons/CalendarIcon';
 import SendIcon from './components/icons/SendIcon';
+import QuickCreatePage from './components/QuickCreatePage';
+import Header from './components/Header';
 
-type AppView = 'landing' | 'dashboard' | 'form' | 'display' | 'loading' | 'settings';
+type AppView = 'landing' | 'dashboard' | 'form' | 'display' | 'loading' | 'settings' | 'quickForm';
 
 const App: React.FC = () => {
     const { settings } = useContext(SettingsContext);
@@ -79,6 +81,9 @@ const App: React.FC = () => {
 
     const handleNavigateToDashboard = () => {
         setView('dashboard');
+        setCurrentLesson(null);
+        setEditingLesson(null);
+        setError(null);
     };
 
     const handleNavigateHome = () => {
@@ -95,7 +100,11 @@ const App: React.FC = () => {
     const handleCreateQuick = () => {
         setError(null);
         setEditingLesson(null);
-        setIsQuickModalOpen(true);
+        if (window.innerWidth < 768) { // md breakpoint
+            setView('quickForm');
+        } else {
+            setIsQuickModalOpen(true);
+        }
     };
     
     const handleBackToDashboard = () => {
@@ -179,9 +188,23 @@ const App: React.FC = () => {
                     status: 'טיוטה' as 'טיוטה' | 'פורסם',
                 };
                 
+                // FIX: The 'lessonActivities' property is deprecated. The new data model uses a three-part structure.
+                // This code now strips the 'imageUrl' from each screen in the 'opening', 'main', and 'summary' parts
+                // before saving to local storage to avoid storing large base64 strings.
                 const updatedLessonForHistory = {
                     ...updatedLessonWithImages,
-                    lessonActivities: updatedLessonWithImages.lessonActivities.map(({ imageUrl, ...activity }) => activity),
+                    opening: {
+                        ...updatedLessonWithImages.opening,
+                        screens: updatedLessonWithImages.opening.screens.map(({ imageUrl, ...rest }) => rest),
+                    },
+                    main: {
+                        ...updatedLessonWithImages.main,
+                        screens: updatedLessonWithImages.main.screens.map(({ imageUrl, ...rest }) => rest),
+                    },
+                    summary: {
+                        ...updatedLessonWithImages.summary,
+                        screens: updatedLessonWithImages.summary.screens.map(({ imageUrl, ...rest }) => rest),
+                    },
                 };
 
                 const newLessons = lessons.map(l => l.id === formData.id ? updatedLessonForHistory : l);
@@ -198,9 +221,23 @@ const App: React.FC = () => {
                     creationDate: new Date().toISOString(),
                 };
 
+                // FIX: The 'lessonActivities' property is deprecated. The new data model uses a three-part structure.
+                // This code now strips the 'imageUrl' from each screen in the 'opening', 'main', and 'summary' parts
+                // before saving to local storage to avoid storing large base64 strings.
                 const lessonForHistory = {
                     ...lessonWithIdAndStatus,
-                    lessonActivities: lessonWithIdAndStatus.lessonActivities.map(({ imageUrl, ...activity }) => activity),
+                    opening: {
+                        ...lessonWithIdAndStatus.opening,
+                        screens: lessonWithIdAndStatus.opening.screens.map(({ imageUrl, ...rest }) => rest),
+                    },
+                    main: {
+                        ...lessonWithIdAndStatus.main,
+                        screens: lessonWithIdAndStatus.main.screens.map(({ imageUrl, ...rest }) => rest),
+                    },
+                    summary: {
+                        ...lessonWithIdAndStatus.summary,
+                        screens: lessonWithIdAndStatus.summary.screens.map(({ imageUrl, ...rest }) => rest),
+                    },
                 };
                 
                 const newLessons = [lessonForHistory, ...lessons];
@@ -221,32 +258,48 @@ const App: React.FC = () => {
     };
 
     const renderContent = () => {
+        const mainAppViews: AppView[] = ['dashboard', 'form', 'display', 'settings'];
+        const isMainAppView = mainAppViews.includes(view);
+
+        let pageContent;
+
         switch (view) {
             case 'landing':
                 return <LandingPage onEnter={handleNavigateToDashboard} onNavigateHome={handleNavigateHome} />;
             case 'loading':
                 return <LessonGenerationLoader />;
-            case 'settings':
-                return <Settings onBack={handleBackToDashboard} />;
-            case 'form':
-                return (
+            case 'quickForm':
+                 return (
                     <div className="min-h-screen bg-gray-50 dark:bg-zinc-900 flex items-center justify-center p-4" dir="rtl">
+                        <div className="container mx-auto">
+                            <QuickCreatePage
+                                onSubmit={handleSubmit}
+                                isLoading={isLoading}
+                                onBack={handleBackToDashboard}
+                                error={error}
+                            />
+                        </div>
+                    </div>
+                );
+            case 'form':
+                pageContent = (
+                    <div className="flex items-center justify-center p-4">
                         <div className="container mx-auto">
                             <LessonForm 
                                 onSubmit={handleSubmit} 
                                 isLoading={isLoading} 
-                                onBack={handleBackToDashboard} 
                                 error={error}
                                 initialData={editingLesson}
                             />
                         </div>
                     </div>
                 );
+                break;
             case 'display':
                 if (currentLesson) {
-                    return (
-                        <div className="flex flex-col h-screen bg-white dark:bg-zinc-950" dir="rtl">
-                             <div className="flex-shrink-0 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
+                    pageContent = (
+                        <div className="flex flex-col bg-white dark:bg-zinc-950">
+                             <div className="px-4 flex-shrink-0 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
                                 <div className="container mx-auto py-4 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">תצוגת שיעור</h2>
                                     <div className="flex items-center gap-4">
@@ -266,40 +319,53 @@ const App: React.FC = () => {
                                             פרסם
                                             </button>
                                         )}
-                                        <button onClick={handleBackToDashboard} className="text-sm font-semibold text-pink-600 hover:underline dark:text-pink-400 dark:hover:text-pink-300">
-                                            &larr; חזרה לרשימת השיעורים
-                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex-grow overflow-y-auto">
+                            <div className="flex-grow">
                                 <div className="container mx-auto">
                                     <LessonDisplay lessonPlan={currentLesson} />
                                 </div>
                             </div>
                         </div>
                     );
+                } else {
+                    setView('dashboard');
+                    return null;
                 }
-                setView('dashboard');
-                return null;
+                break;
+            case 'settings':
+                pageContent = <Settings />;
+                break;
             case 'dashboard':
             default:
-                return (
-                    <div dir="rtl">
-                        <Dashboard 
-                            lessons={lessons}
-                            onSelectLesson={handleSelectLesson}
-                            onCreateNew={handleCreateNew}
-                            onCreateQuick={handleCreateQuick}
-                            onNavigateToSettings={() => handleNavigate('settings')}
-                            onDelete={handleDeleteLesson}
-                            onPublish={handlePublishLesson}
-                            onEdit={handleStartEdit}
-                            onNavigateHome={handleNavigateHome}
-                        />
-                    </div>
+                pageContent = (
+                    <Dashboard 
+                        lessons={lessons}
+                        onSelectLesson={handleSelectLesson}
+                        onCreateNew={handleCreateNew}
+                        onCreateQuick={handleCreateQuick}
+                        onDelete={handleDeleteLesson}
+                        onPublish={handlePublishLesson}
+                        onEdit={handleStartEdit}
+                    />
                 );
+                break;
         }
+
+        if (isMainAppView) {
+            return (
+                 <div className="bg-gray-50 dark:bg-zinc-900 min-h-screen" dir="rtl">
+                    <Header
+                        onNavigateToDashboard={handleNavigateToDashboard}
+                        onNavigateToSettings={() => handleNavigate('settings')}
+                    />
+                    {pageContent}
+                </div>
+            )
+        }
+
+        return pageContent;
     };
 
     return (

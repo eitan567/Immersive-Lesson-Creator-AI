@@ -5,11 +5,9 @@ import { AI_MODELS } from '../constants';
 import CogIcon from './icons/CogIcon';
 import CustomSelect from './CustomSelect';
 
-interface SettingsProps {
-    onBack: () => void;
-}
+interface SettingsProps {}
 
-const Settings: React.FC<SettingsProps> = ({ onBack }) => {
+const Settings: React.FC<SettingsProps> = () => {
     const { settings, setSettings } = useContext(SettingsContext);
 
     const handleToggle = (key: keyof AppSettings) => {
@@ -73,7 +71,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
     );
 
     return (
-        <div className="bg-gray-50 dark:bg-zinc-900 min-h-screen" dir="rtl">
+        <div dir="rtl">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="rounded-2xl">
                     <div className="bg-white dark:bg-zinc-900 pt-0">
@@ -82,9 +80,6 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                                 <CogIcon className="w-8 h-8 text-pink-600 dark:text-pink-400" />
                                 <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">הגדרות</h1>
                             </div>
-                             <button onClick={onBack} className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline">
-                              &larr; חזרה
-                            </button>
                         </div>
         
                         <div className="space-y-8 divide-y divide-gray-200 dark:divide-zinc-700">
