@@ -41,6 +41,8 @@ const defaultFormData: LessonFormData = {
   tone: TONES[0],
   successMetrics: '',
   inclusion: '',
+  immersiveExperienceTitle: '',
+  immersiveExperienceDescription: '',
 };
 
 const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, error, initialData }) => {
@@ -71,6 +73,8 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
             tone: TONES[0],
             successMetrics: '',
             inclusion: '',
+            immersiveExperienceTitle: initialData.immersiveExperienceIdea.title,
+            immersiveExperienceDescription: initialData.immersiveExperienceIdea.description,
         });
     } else {
         setFormData(defaultFormData);
@@ -136,12 +140,29 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
   const handleSelectSuggestion = (suggestion: string) => {
     if (suggestionState.field) {
         const field = suggestionState.field;
-        setFormData(prev => {
-           if (field === 'keyConcepts' && prev[field]) {
-               return {...prev, [field]: `${prev[field]}, ${suggestion}`};
-           }
-           return {...prev, [field]: suggestion};
-        });
+        
+        if (field === 'immersiveExperience') {
+            const lines = suggestion.split('\n');
+            const titleLine = lines.find(line => line.toLowerCase().startsWith('כותרת:'));
+            const descriptionLine = lines.find(line => line.toLowerCase().startsWith('תיאור:'));
+
+            const title = titleLine ? titleLine.substring('כותרת:'.length).trim() : '';
+            const description = descriptionLine ? descriptionLine.substring('תיאור:'.length).trim() : 
+                (title ? lines.slice(1).join('\n').replace(/^תיאור:\s*/i, '').trim() : suggestion);
+
+            setFormData(prev => ({
+                ...prev,
+                immersiveExperienceTitle: title,
+                immersiveExperienceDescription: description,
+            }));
+        } else {
+            setFormData(prev => {
+               if (field === 'keyConcepts' && prev[field]) {
+                   return {...prev, [field]: `${prev[field]}, ${suggestion}`};
+               }
+               return {...prev, [field]: suggestion};
+            });
+        }
     }
   };
 
@@ -157,7 +178,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
     <button
         type="button"
         onClick={() => handleRequestSuggestion(field, `הצעות עבור: ${title}`)}
-        className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+        className="text-pink-500 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 transition-colors"
         title={`קבל הצעות AI עבור ${title}`}
     >
         <SparklesIcon className="w-5 h-5" />
@@ -180,7 +201,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       type="button"
                       onClick={handleAutoFill}
                       disabled={isAutoFilling}
-                      className="p-1 rounded-full text-blue-600 dark:text-blue-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-all hover:bg-blue-100 dark:hover:bg-zinc-800"
+                      className="p-1 rounded-full text-pink-600 dark:text-pink-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-all hover:bg-pink-100 dark:hover:bg-zinc-800"
                       title="מילוי אוטומטי באמצעות AI"
                   >
                       {isAutoFilling ? (
@@ -193,7 +214,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       )}
                   </button>
               </div>
-              <button onClick={onBack} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+              <button onClick={onBack} className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline">
                 &rarr; חזרה למסך הראשי
               </button>
             </div>
@@ -238,7 +259,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                         </div>
                     ) : (
                         <>
-                            <label htmlFor="file-upload" className="cursor-pointer w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-zinc-800 transition-colors">
+                            <label htmlFor="file-upload" className="cursor-pointer w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg hover:border-pink-500 dark:hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-zinc-800 transition-colors">
                                 <PaperClipIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 ml-2" />
                                 <span className="text-gray-700 dark:text-gray-300 font-semibold">לחץ לבחירת קובץ</span>
                             </label>
@@ -275,7 +296,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       min="10"
                       max="180"
                       step="5"
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 dark:text-gray-100"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"
                       required
                     />
                   </div>
@@ -293,7 +314,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                     onChange={handleChange}
                     rows={3}
                     placeholder="מה תרצו שהתלמידים ידעו או יוכלו לעשות בסוף השיעור?"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   ></textarea>
                 </div>
 
@@ -309,7 +330,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                     onChange={handleChange}
                     rows={3}
                     placeholder="מושגים חשובים שתרצו לכלול בשיעור, מופרדים בפסיקים."
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                   ></textarea>
                 </div>
               </div>
@@ -358,7 +379,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       onChange={handleChange}
                       rows={3}
                       placeholder="איך תדעו שהשיעור הצליח? (למשל: תלמידים ידעו להסביר, יבנו מודל וכו')"
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                     ></textarea>
                   </div>
 
@@ -374,15 +395,43 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, onBack, er
                       onChange={handleChange}
                       rows={3}
                       placeholder="הערות לגבי התאמת השיעור לתלמידים עם צרכים מיוחדים או רמות שונות."
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                     ></textarea>
                   </div>
+
+                 <div>
+                    <label htmlFor="immersiveExperienceDescription" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <SparklesIcon className="w-5 h-5 text-pink-500" />
+                        <span>רעיון לחוויה אימרסיבית (אופציונלי)</span>
+                        <AiSuggestionButton field="immersiveExperience" title="רעיון לחוויה אימרסיבית" />
+                    </label>
+                    <div className="space-y-3">
+                        <input
+                        type="text"
+                        id="immersiveExperienceTitle"
+                        name="immersiveExperienceTitle"
+                        value={formData.immersiveExperienceTitle}
+                        onChange={handleChange}
+                        placeholder="כותרת החוויה (למשל: סיור וירטואלי במערכת השמש)"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        />
+                        <textarea
+                        id="immersiveExperienceDescription"
+                        name="immersiveExperienceDescription"
+                        value={formData.immersiveExperienceDescription}
+                        onChange={handleChange}
+                        rows={3}
+                        placeholder="תארו את הרעיון שלכם לחוויה שתכניס את התלמידים לעולם התוכן."
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                        ></textarea>
+                    </div>
+                 </div>
 
                   <div className="pt-4">
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="btn-cta w-full flex items-center justify-center px-6 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
+                      className="btn-cta w-full flex items-center justify-center px-6 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300 disabled:bg-pink-300 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
                     >
                       {isLoading ? (
                         <>

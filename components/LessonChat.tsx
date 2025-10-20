@@ -28,7 +28,9 @@ const fieldTranslations: Record<SuggestionField, string> = {
     teachingStyle: 'סגנון הוראה',
     tone: 'טון השיעור',
     successMetrics: 'מדדי הצלחה',
-    inclusion: 'הכללה והתאמות'
+    inclusion: 'הכללה והתאמות',
+    // FIX: Add missing 'immersiveExperience' property to satisfy the Record<SuggestionField, string> type.
+    immersiveExperience: 'חוויה אימרסיבית',
 };
 
 const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUpdateForm }) => {
@@ -177,7 +179,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
 
                 {/* Center Title */}
                 <div className="flex items-center gap-2">
-                    <SparklesIcon className={`text-blue-500 dark:text-blue-400 ml-2 ${settings.isChatPinned ? 'w-5 h-5' : 'w-6 h-6'}`} />
+                    <SparklesIcon className={`text-pink-500 dark:text-pink-400 ml-2 ${settings.isChatPinned ? 'w-5 h-5' : 'w-6 h-6'}`} />
                     <h3 className={`font-bold text-gray-800 dark:text-white ${settings.isChatPinned ? 'text-base' : 'text-lg'}`}>יועץ השיעורים AI</h3>
                 </div>
                 
@@ -214,11 +216,11 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                         className={`flex items-start gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         {msg.role === 'ai' && (
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 dark:bg-zinc-700 flex items-center justify-center">
-                                <AiAvatarIcon className="w-5 h-5 text-white dark:text-blue-300" />
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-pink-600 dark:bg-zinc-700 flex items-center justify-center">
+                                <AiAvatarIcon className="w-5 h-5 text-white dark:text-pink-300" />
                             </div>
                         )}
-                        <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200'} ${settings.isChatPinned ? 'text-sm' : ''}`}>
+                        <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${msg.role === 'user' ? 'bg-pink-500 text-white' : 'bg-gray-100 dark:bg-zinc-800 text-gray-800 dark:text-gray-200'} ${settings.isChatPinned ? 'text-sm' : ''}`}>
                             {msg.text && <p>{msg.text}</p>}
                             {msg.suggestions && (
                                 <div>
@@ -228,7 +230,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                                             <button
                                                 key={i}
                                                 onClick={() => onSelectSuggestion(msg.suggestions!.field, value)}
-                                                className={`w-full text-right p-2 bg-gray-50 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg border border-gray-300 dark:border-zinc-600 hover:bg-blue-100 dark:hover:bg-blue-600/50 hover:border-blue-400 dark:hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium ${settings.isChatPinned ? 'text-xs' : 'text-sm'}`}
+                                                className={`w-full text-right p-2 bg-gray-50 dark:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg border border-gray-300 dark:border-zinc-600 hover:bg-pink-100 dark:hover:bg-pink-600/50 hover:border-pink-400 dark:hover:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all font-medium ${settings.isChatPinned ? 'text-xs' : 'text-sm'}`}
                                             >
                                                 {value}
                                             </button>
@@ -246,13 +248,13 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                 ))}
                 {isLoading && (
                     <div className="flex justify-start items-start gap-2">
-                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 dark:bg-zinc-700 flex items-center justify-center">
-                            <AiAvatarIcon className="w-5 h-5 text-white dark:text-blue-300" />
+                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-pink-600 dark:bg-zinc-700 flex items-center justify-center">
+                            <AiAvatarIcon className="w-5 h-5 text-white dark:text-pink-300" />
                         </div>
                          <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-2xl bg-gray-100 dark:bg-zinc-800 text-gray-500 flex items-center">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce ml-1" style={{animationDelay: '0.2s'}}></div>
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce ml-1" style={{animationDelay: '0.3s'}}></div>
+                            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce ml-1" style={{animationDelay: '0.2s'}}></div>
+                            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce ml-1" style={{animationDelay: '0.3s'}}></div>
                          </div>
                     </div>
                 )}
@@ -262,10 +264,10 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
             <div className="p-3 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-zinc-700">
                 <div className="flex items-center gap-2 mb-2 px-1 flex-wrap">
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">נסו:</span>
-                    <button onClick={() => handleQuickSuggestionClick('הצע לי פעילויות פתיחה')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-blue-300 bg-purple-100 dark:bg-zinc-700 rounded-full hover:bg-purple-200 dark:hover:bg-zinc-600 transition-colors">
+                    <button onClick={() => handleQuickSuggestionClick('הצע לי פעילויות פתיחה')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-pink-300 bg-pink-100 dark:bg-zinc-700 rounded-full hover:bg-pink-200 dark:hover:bg-zinc-600 transition-colors">
                         פעילויות פתיחה
                     </button>
-                    <button onClick={() => handleQuickSuggestionClick('איך אפשר להפוך את השיעור לחוויתי יותר?')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-blue-300 bg-purple-100 dark:bg-zinc-700 rounded-full hover:bg-purple-200 dark:hover:bg-zinc-600 transition-colors">
+                    <button onClick={() => handleQuickSuggestionClick('איך אפשר להפוך את השיעור לחוויתי יותר?')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-pink-300 bg-pink-100 dark:bg-zinc-700 rounded-full hover:bg-pink-200 dark:hover:bg-zinc-600 transition-colors">
                         הפוך לחוויתי
                     </button>
                 </div>

@@ -79,10 +79,10 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                     <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-lg">
                         <div className="flex justify-between items-center mb-8">
                              <div className="flex items-center gap-3">
-                                <CogIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                                <CogIcon className="w-8 h-8 text-pink-600 dark:text-pink-400" />
                                 <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">הגדרות</h1>
                             </div>
-                             <button onClick={onBack} className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                             <button onClick={onBack} className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline">
                               &larr; חזרה
                             </button>
                         </div>
@@ -91,7 +91,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                             
                             {/* Appearance Settings */}
                             <div className="pt-6 first:pt-0">
-                                <h2 className="text-2xl font-bold mb-6 gradient-text">מראה</h2>
+                                <h2 className="text-2xl font-bold mb-6 text-pink-600">מראה</h2>
                                 <div>
                                     <p className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">ערכת נושא</p>
                                     <div className="flex items-center gap-x-6">
@@ -134,7 +134,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         
                             {/* Chat Settings */}
                             <div className="pt-8">
-                                <h2 className="text-2xl font-bold mb-6 gradient-text">הגדרות יועץ ה-AI (צ'אט)</h2>
+                                <h2 className="text-2xl font-bold mb-6 text-pink-600">הגדרות יועץ ה-AI (צ'אט)</h2>
                                 <div className="space-y-6">
                                     <ToggleSwitch
                                         label="סגור צ'אט אוטומטית"
@@ -196,7 +196,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         
                             {/* AI Settings */}
                             <div className="pt-8">
-                                <h2 className="text-2xl font-bold mb-6 gradient-text">הגדרות בינה מלאכותית</h2>
+                                <h2 className="text-2xl font-bold mb-6 text-pink-600">הגדרות בינה מלאכותית</h2>
                                 <div className="space-y-6">
                                     <div>
                                     <label htmlFor="aiModel" className="block text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">מודל בינה מלאכותית</label>

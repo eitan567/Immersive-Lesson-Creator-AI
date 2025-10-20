@@ -23,7 +23,7 @@ const InfoCard: React.FC<{ icon: React.ReactNode; title: string; children: React
     <div className="div-cta rounded-xl">
         <div className="bg-white dark:bg-zinc-950 p-6 rounded-xl shadow-md">
             <div className="flex items-center mb-4">
-                <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 p-2 rounded-full ml-4">{icon}</div>
+                <div className="bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 p-2 rounded-full ml-4">{icon}</div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h3>
             </div>
             {children}
@@ -37,7 +37,7 @@ const ActivityCard: React.FC<{ activity: LessonActivity, index: number }> = ({ a
             <img src={activity.imageUrl} alt={activity.title} className="w-full h-40 object-cover mb-4 rounded-lg" />
         )}
         <div className="flex items-start">
-            <div className="bg-blue-500 text-white rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center font-bold text-sm ml-4">
+            <div className="bg-pink-500 text-white rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center font-bold text-sm ml-4">
                 {index + 1}
             </div>
             <div className="flex-grow">
@@ -46,7 +46,7 @@ const ActivityCard: React.FC<{ activity: LessonActivity, index: number }> = ({ a
                     <ClockIcon className="w-4 h-4 ml-1.5" />
                     <span>{activity.duration} דקות</span>
                     <span className="mx-2">|</span>
-                    <span className="font-medium text-blue-600 dark:text-blue-400">{activityTypeTranslations[activity.type] || activity.type}</span>
+                    <span className="font-medium text-pink-600 dark:text-pink-400">{activityTypeTranslations[activity.type] || activity.type}</span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{activity.description}</p>
             </div>
@@ -58,7 +58,7 @@ const ActivityCard: React.FC<{ activity: LessonActivity, index: number }> = ({ a
 const LessonDisplay: React.FC<LessonDisplayProps> = ({ lessonPlan }) => {
   return (
     <div className="bg-gray-50 dark:bg-zinc-900 rounded-2xl">
-      <header className="mb-8 pb-4 border-b-2 border-blue-200 dark:border-blue-800">
+      <header className="mb-8 pb-4 border-b-2 border-pink-200 dark:border-pink-800">
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-gray-50 mb-2">{lessonPlan.lessonTitle}</h2>
         <div className="flex items-center space-x-4 space-x-reverse text-gray-600 dark:text-gray-300">
           <span>{lessonPlan.targetAudience}</span>
@@ -86,7 +86,7 @@ const LessonDisplay: React.FC<LessonDisplayProps> = ({ lessonPlan }) => {
         <div className="div-cta rounded-xl">
           <div className="bg-white dark:bg-zinc-950 p-6 rounded-xl shadow-md">
             <div className="flex items-center mb-4">
-                <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 p-2 rounded-full ml-4"><BookOpenIcon className="w-6 h-6" /></div>
+                <div className="bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 p-2 rounded-full ml-4"><BookOpenIcon className="w-6 h-6" /></div>
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">מהלך השיעור</h3>
             </div>
             <div className="space-y-4">

@@ -53,7 +53,7 @@ const LessonCard: React.FC<LessonCardProps> = ({ lesson, onSelect, onDelete, onP
                         )}
                         <button 
                             onClick={(e) => handleActionClick(e, () => onEdit(lesson))}
-                            className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                            className="p-2 text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 hover:bg-pink-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
                             title="ערוך שיעור"
                         >
                             <PencilIcon className="w-5 h-5" />

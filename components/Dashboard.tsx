@@ -77,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                             <input
                                 type="text"
                                 placeholder="חיפוש חופשי..."
-                                className="w-full md:flex-1 px-4 py-3 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+                                className="w-full md:flex-1 px-4 py-3 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -132,17 +132,17 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button 
                         onClick={onCreateNew}
-                        className="btn-cta w-full sm:w-auto flex items-center justify-center px-8 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
+                        className="btn-cta w-full sm:w-auto flex items-center justify-center px-8 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all duration-300 transform hover:scale-105"
                     >
                         <PlusIcon className="w-6 h-6 ml-3" />
-                        יצירת שיעור חדש
+                        שיעור חדש
                     </button>
                      <button 
                         onClick={onCreateQuick}
-                        className="btn-cta w-full sm:w-auto flex items-center justify-center px-8 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
+                        className="btn-cta w-full sm:w-auto flex items-center justify-center px-8 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all duration-300 transform hover:scale-105"
                     >
                         <BoltIcon className="w-6 h-6 ml-3" />
-                        יצירת שיעור מהיר
+                        שיעור מהיר
                     </button>
                 </div>
             </main>

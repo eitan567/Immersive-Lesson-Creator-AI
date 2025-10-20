@@ -143,6 +143,7 @@ const buildPrompt = (formData: LessonFormData, isFile: boolean): string => {
     טון השיעור: ${formData.tone || 'ניטרלי'}
     מדדי הצלחה: ${formData.successMetrics || 'לא צוין'}
     הנחיות הכללה והתאמה: ${formData.inclusion || 'לא צוין'}
+    רעיון לחוויה אימרסיבית (אם סופק): ${formData.immersiveExperienceTitle ? `כותרת: ${formData.immersiveExperienceTitle}, תיאור: ${formData.immersiveExperienceDescription}` : 'לא סופק, יש ליצור רעיון מקורי.'}
   `;
 };
 
@@ -215,8 +216,10 @@ export const generateFullFormSuggestions = async (topic: string, gradeLevel: str
             tone: { type: Type.STRING, enum: TONES, description: "הטון המתאים ביותר לשיעור." },
             successMetrics: { type: Type.STRING, description: "טקסט קצר המתאר דרך אחת או שתיים למדוד את הצלחת השיעור." },
             inclusion: { type: Type.STRING, description: "טקסט קצר עם רעיון אחד להתאמת השיעור לתלמידים שונים." },
+            immersiveExperienceTitle: { type: Type.STRING, description: "כותרת קצרה ומושכת לרעיון החוויה האימרסיבית." },
+            immersiveExperienceDescription: { type: Type.STRING, description: "תיאור קצר של רעיון יצירתי לחוויה אימרסיבית." },
         },
-        required: ["objectives", "keyConcepts", "teachingStyle", "tone", "successMetrics", "inclusion"],
+        required: ["objectives", "keyConcepts", "teachingStyle", "tone", "successMetrics", "inclusion", "immersiveExperienceTitle", "immersiveExperienceDescription"],
     };
 
     const prompt = `
@@ -281,7 +284,10 @@ const getSuggestionPrompt = (field: SuggestionField, context: LessonFormData): s
         teachingStyle: `הצע סגנונות הוראה מתאימים. בחר מתוך הרשימה הזו: ${TEACHING_STYLES.join(', ')}.`,
         tone: `הצע טונים מתאימים לשיעור. בחר מתוך הרשימה הזו: ${TONES.join(', ')}.`,
         successMetrics: `הצע דרכים למדוד את הצלחת השיעור.`,
-        inclusion: `הצע אסטרטגיות הכללה והתאמה ללומדים מגוונים.`
+        inclusion: `הצע אסטרטגיות הכללה והתאמה ללומדים מגוונים.`,
+        immersiveExperience: `הצע רעיונות יצירתיים לחוויה אימרסיבית. כל הצעה חייבת להיות בפורמט הבא, בשתי שורות נפרדות:
+כותרת: [כותרת ההצעה כאן]
+תיאור: [תיאור ההצעה כאן]`
     };
 
     return `${basePrompt}\n\nשדה לקבלת הצעות עבורו: '${field}'\nהנחיה: ${fieldPrompts[field]}`;

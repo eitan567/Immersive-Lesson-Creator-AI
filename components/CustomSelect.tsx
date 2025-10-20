@@ -75,14 +75,14 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           required={required}
           placeholder={placeholder}
           autoComplete="off"
-          className="w-full bg-transparent px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-right text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+          className="w-full bg-transparent px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-right text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
           onClick={() => setIsOpen(true)}
         />
       ) : (
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full bg-transparent px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex justify-between items-center text-right"
+          className="w-full bg-transparent px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors flex justify-between items-center text-right"
         >
           <span className="text-gray-800 dark:text-gray-200">{value || placeholder}</span>
           <ChevronDownIcon className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -98,7 +98,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 <li
                 key={option}
                 onClick={() => handleSelectOption(option)}
-                className="px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-zinc-950 text-right text-gray-800 dark:text-gray-200"
+                className="px-4 py-2 cursor-pointer hover:bg-pink-50 dark:hover:bg-zinc-950 text-right text-gray-800 dark:text-gray-200"
                 >
                 {option}
                 </li>

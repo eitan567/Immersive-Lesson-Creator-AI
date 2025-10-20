@@ -66,7 +66,7 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="div-cta rounded-2xl w-full max-w-2xl relative" onClick={e => e.stopPropagation()}>
-        <div className="bg-white dark:bg-zinc-950 rounded-2xl shadow-xl p-8">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-8">
           <button onClick={onClose} className="absolute top-4 left-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 z-10">
               <XIcon className="w-6 h-6" />
           </button>
@@ -101,7 +101,7 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
                     </div>
                 ) : (
                     <>
-                        <label htmlFor="quick-file-upload" className="cursor-pointer w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-zinc-800 transition-colors">
+                        <label htmlFor="quick-file-upload" className="cursor-pointer w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-zinc-900 border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg hover:border-pink-500 dark:hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-zinc-800 transition-colors">
                             <PaperClipIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 ml-2" />
                             <span className="text-gray-700 dark:text-gray-300 font-semibold">לחץ לבחירת קובץ</span>
                         </label>
@@ -137,7 +137,7 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
                   min="10"
                   max="180"
                   step="5"
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900 dark:text-gray-100"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"
                   required
                 />
               </div>
@@ -147,7 +147,7 @@ const QuickCreateModal: React.FC<QuickCreateModalProps> = ({ isOpen, onClose, on
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-cta w-full flex items-center justify-center px-6 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:bg-blue-300 disabled:cursor-not-allowed transition-all"
+                className="btn-cta w-full flex items-center justify-center px-6 py-4 text-black dark:text-white text-xl font-bold rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300 disabled:bg-pink-300 disabled:cursor-not-allowed transition-all"
               >
                 {isLoading ? (
                   <>

@@ -28,7 +28,7 @@ export interface LessonPlan {
   creationDate: string;
 }
 
-export type SuggestionField = 'topic' | 'objectives' | 'keyConcepts' | 'teachingStyle' | 'tone' | 'successMetrics' | 'inclusion';
+export type SuggestionField = 'topic' | 'objectives' | 'keyConcepts' | 'teachingStyle' | 'tone' | 'successMetrics' | 'inclusion' | 'immersiveExperience';
 
 export interface ChatSuggestion {
     field: SuggestionField;
@@ -53,6 +53,8 @@ export interface LessonFormData {
   tone?: string;
   successMetrics?: string;
   inclusion?: string;
+  immersiveExperienceTitle?: string;
+  immersiveExperienceDescription?: string;
 }
 
 export interface AppSettings {

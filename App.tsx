@@ -248,7 +248,7 @@ const App: React.FC = () => {
                                                 פרסם
                                             </button>
                                         )}
-                                        <button onClick={handleBackToDashboard} className="text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
+                                        <button onClick={handleBackToDashboard} className="text-sm font-semibold text-pink-600 hover:underline dark:text-pink-400 dark:hover:text-pink-300">
                                             &larr; חזרה לרשימת השיעורים
                                         </button>
                                     </div>
