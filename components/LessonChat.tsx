@@ -11,6 +11,7 @@ import ChevronDoubleLeftIcon from './icons/ChevronDoubleLeftIcon';
 import ChevronDoubleRightIcon from './icons/ChevronDoubleRightIcon';
 import AiAvatarIcon from './icons/AiAvatarIcon';
 import UserAvatarIcon from './icons/UserAvatarIcon';
+import ResizeHandleIcon from './icons/ResizeHandleIcon';
 
 interface LessonChatProps {
     isOpen: boolean;
@@ -20,6 +21,8 @@ interface LessonChatProps {
 }
 
 const MAX_CHARS = 250;
+const MIN_WIDTH = 320;
+const MIN_HEIGHT = 400;
 
 const fieldTranslations: Record<SuggestionField, string> = {
     topic: 'נושא השיעור',
@@ -29,7 +32,6 @@ const fieldTranslations: Record<SuggestionField, string> = {
     tone: 'טון השיעור',
     successMetrics: 'מדדי הצלחה',
     inclusion: 'הכללה והתאמות',
-    // FIX: Add missing 'immersiveExperience' property to satisfy the Record<SuggestionField, string> type.
     immersiveExperience: 'חוויה אימרסיבית',
 };
 
@@ -43,10 +45,13 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Draggable state
+    // Draggable and Resizable state
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [size, setSize] = useState({ width: 384, height: 600 });
     const [isDragging, setIsDragging] = useState(false);
+    const [isResizing, setIsResizing] = useState(false);
     const dragStartRef = useRef({ x: 0, y: 0, initialX: 0, initialY: 0 });
+    const resizeStartRef = useRef({ x: 0, y: 0, initialWidth: 0, initialHeight: 0, initialY: 0 });
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,8 +92,11 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
 
     // Draggable handlers
     const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!settings.isChatFloating) return;
-        if ((e.target as HTMLElement).closest('button')) return;
+        if (!settings.isChatFloating || isResizing) return;
+        if ((e.target as HTMLElement).closest('button, input, form')) return;
+        
+        // Prevent drag from resize handle
+        if ((e.target as HTMLElement).dataset.role === 'resize-handle' || (e.target as HTMLElement).closest('[data-role="resize-handle"]')) return;
 
         setIsDragging(true);
         dragStartRef.current = {
@@ -98,9 +106,24 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
             initialY: position.y,
         };
     };
+    
+    // Resize handler
+    const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsResizing(true);
+        resizeStartRef.current = {
+            x: e.clientX,
+            y: e.clientY,
+            initialWidth: size.width,
+            initialHeight: size.height,
+            initialY: position.y,
+        };
+    };
 
     useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
+        const handleDragMouseMove = (e: MouseEvent) => {
+            if (!isDragging) return;
             const dx = e.clientX - dragStartRef.current.x;
             const dy = e.clientY - dragStartRef.current.y;
             setPosition({
@@ -109,24 +132,52 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
             });
         };
 
+        const handleResizeMouseMove = (e: MouseEvent) => {
+            if (!isResizing) return;
+            const dx = e.clientX - resizeStartRef.current.x;
+            const dy = e.clientY - resizeStartRef.current.y;
+            
+            const newWidth = resizeStartRef.current.initialWidth - dx;
+            const newHeight = resizeStartRef.current.initialHeight + dy;
+
+            // To make it expand downwards, update Y position.
+            // Positive dy (mouse down) should increase y (translate down)
+            const newY = resizeStartRef.current.initialY + dy;
+
+            setSize({
+                width: Math.max(MIN_WIDTH, newWidth),
+                height: Math.max(MIN_HEIGHT, newHeight),
+            });
+             if (settings.isChatFloating) {
+                setPosition(prev => ({ ...prev, y: newY }));
+            }
+        };
+        
         const handleMouseUp = () => {
             setIsDragging(false);
+            setIsResizing(false);
         };
 
         if (isDragging) {
             document.body.style.cursor = 'grabbing';
             document.body.style.userSelect = 'none';
-            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mousemove', handleDragMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        } else if (isResizing) {
+            document.body.style.cursor = 'nesw-resize';
+            document.body.style.userSelect = 'none';
+            window.addEventListener('mousemove', handleResizeMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
         }
 
         return () => {
             document.body.style.cursor = 'default';
             document.body.style.userSelect = 'auto';
-            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mousemove', handleDragMouseMove);
+            window.removeEventListener('mousemove', handleResizeMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging]);
+    }, [isDragging, isResizing, settings.isChatFloating]);
     
     const handleQuickSuggestionClick = (prompt: string) => {
         setInput(prompt);
@@ -139,74 +190,59 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
         return 'text-gray-500 dark:text-gray-400';
     };
 
-
     if (!isOpen) return null;
+    
+    const Title = (
+        <div className="flex items-center gap-2">
+            <h3 className={`font-bold text-gray-800 dark:text-white ${settings.isChatPinned ? 'text-base' : 'text-lg'}`}>יועץ השיעורים AI</h3>
+            <SparklesIcon className={`text-pink-500 dark:text-pink-400 ${settings.isChatPinned ? 'w-5 h-5' : 'w-6 h-6'}`} />
+        </div>
+    );
     
     const ChatContent = (
         <>
             <header 
-                className={`relative flex items-center justify-center p-4 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 ${!settings.isChatPinned && settings.isChatFloating ? 'cursor-grab' : ''}`}
+                className={`relative flex items-center p-4 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 
+                ${!settings.isChatPinned && settings.isChatFloating ? 'cursor-grab' : ''}
+                ${!settings.isChatPinned ? 'justify-between' : 'justify-center'}`}
                 onMouseDown={!settings.isChatPinned ? handleMouseDown : undefined}
             >
-                {/* Left Controls (for RTL, this is the end) */}
-                <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                    {settings.isChatPinned ? (
-                        settings.chatPosition === 'right' ? (
-                            // Pinned Right -> Show Switch-to-Left arrow on the left side
-                            <button 
-                                onClick={() => setSettings({ chatPosition: 'left' })}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
-                                title='העבר לשמאל'
-                            >
-                                <ChevronLeftIcon className="w-6 h-6" />
-                            </button>
-                        ) : (
-                            // Pinned Left -> Show Collapse-to-Left arrow on the left side
-                             <button
-                                onClick={() => setSettings({ isChatCollapsed: true })}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
-                                title="הסתר צ'אט"
-                            >
-                                <ChevronDoubleLeftIcon className="w-6 h-6" />
-                            </button>
-                        )
-                    ) : (
-                         <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
+                {settings.isChatPinned ? (
+                    <>
+                        {/* Pinned Controls */}
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                            {settings.chatPosition === 'right' ? (
+                                <button onClick={() => setSettings({ chatPosition: 'left' })} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white" title='העבר לשמאל'>
+                                    <ChevronLeftIcon className="w-6 h-6" />
+                                </button>
+                            ) : (
+                                <button onClick={() => setSettings({ isChatCollapsed: true })} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white" title="הסתר צ'אט">
+                                    <ChevronDoubleLeftIcon className="w-6 h-6" />
+                                </button>
+                            )}
+                        </div>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                            {settings.chatPosition === 'left' ? (
+                                <button onClick={() => setSettings({ chatPosition: 'right' })} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white" title='העבר לימין'>
+                                    <ChevronRightIcon className="w-6 h-6" />
+                                </button>
+                            ) : (
+                                <button onClick={() => setSettings({ isChatCollapsed: true })} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white" title="הסתר צ'אט">
+                                    <ChevronDoubleRightIcon className="w-6 h-6" />
+                                </button>
+                            )}
+                        </div>
+                        {Title}
+                    </>
+                ) : (
+                    <>
+                        {/* Floating Header: Title first for RTL to be on right */}
+                        {Title}
+                        <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
                             <XIcon className="w-6 h-6" />
                         </button>
-                    )}
-                </div>
-
-                {/* Center Title */}
-                <div className="flex items-center gap-2">
-                    <SparklesIcon className={`text-pink-500 dark:text-pink-400 ml-2 ${settings.isChatPinned ? 'w-5 h-5' : 'w-6 h-6'}`} />
-                    <h3 className={`font-bold text-gray-800 dark:text-white ${settings.isChatPinned ? 'text-base' : 'text-lg'}`}>יועץ השיעורים AI</h3>
-                </div>
-                
-                {/* Right Controls (for RTL, this is the start) */}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    {settings.isChatPinned && (
-                         settings.chatPosition === 'left' ? (
-                            // Pinned Left -> Show Switch-to-Right arrow on the right side
-                             <button 
-                                onClick={() => setSettings({ chatPosition: 'right' })}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
-                                title='העבר לימין'
-                            >
-                                <ChevronRightIcon className="w-6 h-6" />
-                            </button>
-                         ) : (
-                            // Pinned Right -> Show Collapse-to-Right arrow on the right side
-                             <button
-                                onClick={() => setSettings({ isChatCollapsed: true })}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
-                                title="הסתר צ'אט"
-                            >
-                                <ChevronDoubleRightIcon className="w-6 h-6" />
-                            </button>
-                         )
-                    )}
-                </div>
+                    </>
+                )}
             </header>
 
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-white dark:bg-zinc-900">
@@ -310,19 +346,34 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
     
     const positionProp = settings.chatPosition === 'right' ? { right: '1rem' } : { left: '1rem' };
 
-    const chatContainerClasses = `fixed w-96 h-[600px] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-gray-200 dark:border-zinc-700`
+    const chatContainerClasses = `fixed bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-pink-400 dark:border-zinc-700`;
     
-    const chatPositionStyle: React.CSSProperties = settings.isChatFloating 
-            ? { ...positionProp, bottom: '1rem', transform: `translate(${position.x}px, ${position.y}px)` } 
-            : { ...positionProp, bottom: '1rem' };
+    const chatPositionStyle: React.CSSProperties = {
+        ...positionProp,
+        bottom: '1rem',
+        width: `${size.width}px`,
+        height: `${size.height}px`,
+        ...(settings.isChatFloating && { transform: `translate(${position.x}px, ${position.y}px)` }),
+    };
 
 
     return (
         <div 
          className={chatContainerClasses}
          style={chatPositionStyle}
+         dir="rtl"
         >
             {ChatContent}
+            {!settings.isChatPinned && (
+                <div
+                    data-role="resize-handle"
+                    onMouseDown={handleResizeMouseDown}
+                    className="absolute bottom-0 left-0 w-6 h-6 p-1 cursor-nesw-resize z-10 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                    title="שנה גודל"
+                >
+                    <ResizeHandleIcon className="w-full h-full -scale-x-100" />
+                </div>
+            )}
         </div>
     );
 };
