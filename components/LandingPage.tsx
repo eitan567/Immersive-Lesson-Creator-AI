@@ -141,7 +141,7 @@ const StepCard: React.FC<{ number: string; title: string; description: string }>
 );
 
 const TestimonialCard: React.FC<{ quote: string; author: string; role: string; }> = ({ quote, author, role }) => (
-    <div className="bg-white dark:bg-zinc-950 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-800">
+    <div className="div-cta bg-white dark:bg-zinc-950 p-8 rounded-xl shadow-lg border border-pink-300 dark:border-pink-800">
         <p className="text-lg text-gray-700 dark:text-gray-300 italic mb-4">"{quote}"</p>
         <p className="font-bold text-gray-800 dark:text-gray-100">{author}</p>
         <p className="text-gray-500 dark:text-gray-400">{role}</p>

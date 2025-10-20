@@ -264,16 +264,16 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
             <div className="p-3 bg-gray-50 dark:bg-zinc-800 border-t border-gray-200 dark:border-zinc-700">
                 <div className="flex items-center gap-2 mb-2 px-1 flex-wrap">
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">נסו:</span>
-                    <button onClick={() => handleQuickSuggestionClick('הצע לי פעילויות פתיחה')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-pink-300 bg-pink-100 dark:bg-zinc-700 rounded-full hover:bg-pink-200 dark:hover:bg-zinc-600 transition-colors">
+                    <button onClick={() => handleQuickSuggestionClick('הצע לי פעילויות פתיחה')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-pink-100 dark:bg-zinc-950 rounded-full hover:bg-pink-200 dark:hover:bg-zinc-600 transition-colors">
                         פעילויות פתיחה
                     </button>
-                    <button onClick={() => handleQuickSuggestionClick('איך אפשר להפוך את השיעור לחוויתי יותר?')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-pink-300 bg-pink-100 dark:bg-zinc-700 rounded-full hover:bg-pink-200 dark:hover:bg-zinc-600 transition-colors">
+                    <button onClick={() => handleQuickSuggestionClick('איך אפשר להפוך את השיעור לחוויתי יותר?')} className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-200 bg-pink-100 dark:bg-zinc-950 rounded-full hover:bg-pink-200 dark:hover:bg-zinc-600 transition-colors">
                         הפוך לחוויתי
                     </button>
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="mx-2 my-4">
                     <div className="div-cta rounded-full transition-shadow duration-300">
-                        <div className="relative flex items-center bg-white dark:bg-zinc-700 rounded-full">
+                        <div className="relative flex items-center bg-white dark:bg-zinc-900 rounded-full">
                             <input
                                 ref={inputRef}
                                 type="text"
