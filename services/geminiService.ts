@@ -383,7 +383,7 @@ const getSuggestionPrompt = (field: SuggestionField, context: LessonFormData): s
         **חשוב מאוד: כל ההצעות חייבות להיות בעברית בלבד.**
 
         הקשר השיעור:
-        - נושא: ${context.topic || 'לא צוין'}
+        - נושא: ${context.unitTopic || context.topic || 'לא צוין'}
         - שכבת גיל: ${context.gradeLevel}
     `;
 
@@ -397,7 +397,14 @@ const getSuggestionPrompt = (field: SuggestionField, context: LessonFormData): s
         inclusion: `הצע אסטרטגיות הכללה והתאמה ללומדים מגוונים.`,
         immersiveExperience: `הצע רעיונות יצירתיים לחוויה אימרסיבית. כל הצעה חייבת להיות בפורמט הבא, בשתי שורות נפרדות:
 כותרת: [כותרת ההצעה כאן]
-תיאור: [תיאור ההצעה כאן]`
+תיאור: [תיאור ההצעה כאן]`,
+        priorKnowledge: `בהתבסס על נושא היחידה "${context.unitTopic || context.topic}", הצע 3-4 נקודות תמציתיות המתארות ידע קודם נדרש מהתלמידים.`,
+        contentGoals: `בהתבסס על נושא היחידה "${context.unitTopic || context.topic}", הצע 3-4 מטרות תוכן ספציפיות. כל מטרה צריכה להיות מנוסחת כפריט ברשימה (למשל, - להגדיר...).`,
+        skillGoals: `בהתבסס על נושא היחידה "${context.unitTopic || context.topic}", הצע 2-3 מטרות מיומנות (למשל, עבודת צוות, חשיבה ביקורתית, פתרון בעיות) מנוסחות כפריטים ברשימה.`,
+        generalDescription: `כתוב 3-4 הצעות לתיאור כללי קצר ומרתק עבור שיעור בנושא "${context.unitTopic || context.topic}".`,
+        openingContent: `הצע 3-4 רעיונות לפעילויות פתיחה מסקרנות וקצרות עבור שיעור בנושא "${context.unitTopic || context.topic}".`,
+        mainContent: `הצע 3-4 רעיונות לפעילויות מרכזיות ומגוונות עבור גוף השיעור בנושא "${context.unitTopic || context.topic}".`,
+        summaryContent: `הצע 3-4 רעיונות לפעילויות סיכום ממצות ומשמעותיות עבור שיעור בנושא "${context.unitTopic || context.topic}".`
     };
 
     return `${basePrompt}\n\nשדה לקבלת הצעות עבורו: '${field}'\nהנחיה: ${fieldPrompts[field]}`;
@@ -512,5 +519,70 @@ export const chatWithLessonAssistant = async (message: string, context: LessonFo
             throw new Error(`Chat error: ${error.message}`);
         }
         throw new Error("An unknown error occurred in chat assistant.");
+    }
+};
+
+const supportChatResponseSchema = {
+    type: Type.OBJECT,
+    properties: {
+        responseText: {
+            type: Type.STRING,
+            description: "A helpful and concise response to the user's support query, written in Hebrew.",
+        }
+    },
+    required: ["responseText"],
+};
+
+export const getSupportChatResponse = async (message: string): Promise<string> => {
+    if (!process.env.API_KEY) {
+        throw new Error("API key not found.");
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const prompt = `
+        אתה נציג תמיכה טכנית עבור אפליקציה בשם "יוצר השיעורים AI".
+        התפקיד שלך הוא לסייע למשתמשים, לענות על שאלות, לקבל תלונות ולספק תמיכה.
+        התשובות שלך חייבות להיות בעברית בלבד, ובטון ידידותי, מקצועי וסבלני.
+
+        --- הנחיות להתנהגות ---
+        1.  **זיהוי כוונות:** נתח את בקשת המשתמש. האם זו שאלה על שימוש באפליקציה? תלונה? בקשה לפרטי קשר?
+        2.  **שאלות על שימוש ("איך עושים..."):** ספק תשובות ברורות ותמציתיות. הדריכו את המשתמש צעד אחר צעד במידת הצורך.
+        3.  **תלונות או בעיות טכניות:**
+            -   התחל בהבעת אמפתיה ("אני מבין את התסכול", "אני מצטער לשמוע שנתקלת בבעיה").
+            -   אם חסר מידע, בקש פרטים נוספים כדי להבין את הבעיה (למשל: "תוכל/י לתאר לי בדיוק מה קרה?", "באיזה שלב הבעיה הופיעה?").
+            -   אם נראה שהבעיה דורשת טיפול של צוות התמיכה, אמור למשתמש שתעביר את הפרטים הלאה ובקש ממנו את שמו וכתובת האימייל שלו כדי שיוכלו לחזור אליו. אל תמציא פתרונות טכניים מורכבים.
+        4.  **בקשת פרטי קשר:** אם המשתמש מבקש לדבר עם נציג אנושי או לקבל פרטי קשר, ספק את הפרטים הבאים:
+            -   אימייל: support@lessoncreator.ai
+            -   טלפון: 1-800-555-LESSON
+            -   הסבר שאלו הדרכים ליצור קשר עם צוות התמיכה האנושי.
+        5.  **שאלות כלליות:** ענה בצורה אינפורמטיבית על האפליקציה ותכונותיה.
+
+        שמור על תשובות קצרות יחסית, המתאימות לחלון צ'אט.
+
+        --- בקשת המשתמש הנוכחית ---
+        "${message}"
+
+        --- הנחיה ---
+        החזר אובייקט JSON התואם לסכמה שסופקה עם תשובה ישירה לבקשת המשתמש.
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: supportChatResponseSchema,
+            },
+        });
+        const jsonText = response.text.trim();
+        const result = JSON.parse(jsonText);
+        return result.responseText || "מצטער, לא הצלחתי להבין את הבקשה. אפשר לנסח מחדש?";
+    } catch (error) {
+        console.error("Error in support chat:", error);
+         if (error instanceof Error) {
+            throw new Error(`Chat error: ${error.message}`);
+        }
+        throw new Error("An unknown error occurred in support chat.");
     }
 };

@@ -79,17 +79,35 @@ const LessonPartFormSection: React.FC<{
     partLabel: string;
     formData: LessonFormData;
     handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { name: string; value: string } }) => void;
-}> = ({ partName, partLabel, formData, handleChange }) => {
+    handleRequestSuggestion: (field: SuggestionField, title: string) => void;
+}> = ({ partName, partLabel, formData, handleChange, handleRequestSuggestion }) => {
+    
+    const AiSuggestionButton: React.FC<{field: SuggestionField, title: string}> = ({ field, title }) => (
+      <button
+          type="button"
+          onClick={() => handleRequestSuggestion(field, `הצעות עבור: ${title}`)}
+          className="text-pink-500 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 transition-colors"
+          title={`קבל הצעות AI עבור ${title}`}
+      >
+          <SparklesIcon className="w-5 h-5" />
+      </button>
+    );
+    
+    const contentField = `${partName}Content` as const;
+
     return (
         <fieldset className="border border-gray-300 dark:border-zinc-700 p-4 rounded-lg">
             <legend className="text-xl font-bold text-pink-600 dark:text-pink-400 px-2">{partLabel}</legend>
             <div className="space-y-4">
                 <div>
-                    <label htmlFor={`${partName}Content`} className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">תוכן</label>
+                    <label htmlFor={contentField} className="flex items-center gap-2 block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <span>תוכן</span>
+                        <AiSuggestionButton field={contentField} title={`תוכן ל${partLabel}`} />
+                    </label>
                     <textarea
-                        id={`${partName}Content`}
-                        name={`${partName}Content`}
-                        value={formData[`${partName}Content` as keyof LessonFormData] as string || ''}
+                        id={contentField}
+                        name={contentField}
+                        value={formData[contentField] || ''}
                         onChange={handleChange}
                         rows={4}
                         placeholder={`תאר את הפעילויות והתוכן עבור חלק ה${partLabel}...`}
@@ -251,8 +269,8 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
   };
 
   const handleRequestSuggestion = async (field: SuggestionField, title: string) => {
-    if (!formData.topic && field !== 'topic') {
-        alert("יש למלא 'נושא השיעור' תחילה.");
+    if (!formData.unitTopic) {
+        alert("יש למלא 'נושא היחידה' תחילה.");
         return;
     }
     setSuggestionState({ isOpen: true, isLoading: true, field, title, suggestions: [] });
@@ -285,8 +303,8 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
             }));
         } else {
             setFormData(prev => {
-               if (field === 'keyConcepts' && prev[field]) {
-                   return {...prev, [field]: `${prev[field]}, ${suggestion}`};
+               if ((field === 'keyConcepts' || field === 'contentGoals' || field === 'skillGoals' || field === 'objectives') && prev[field]) {
+                   return {...prev, [field]: `${prev[field]}\n${suggestion}`};
                }
                return {...prev, [field]: suggestion};
             });
@@ -381,19 +399,31 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                   </div>
                   <div className="space-y-6">
                      <div>
-                        <label htmlFor="priorKnowledge" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">ידע קודם נדרש</label>
+                        <label htmlFor="priorKnowledge" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <span>ידע קודם נדרש</span>
+                            <AiSuggestionButton field="priorKnowledge" title="ידע קודם נדרש" />
+                        </label>
                         <textarea id="priorKnowledge" name="priorKnowledge" value={formData.priorKnowledge} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
                       </div>
                       <div>
-                        <label htmlFor="contentGoals" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מטרות ברמת התוכן</label>
+                        <label htmlFor="contentGoals" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <span>מטרות ברמת התוכן</span>
+                            <AiSuggestionButton field="contentGoals" title="מטרות ברמת התוכן" />
+                        </label>
                         <textarea id="contentGoals" name="contentGoals" value={formData.contentGoals} onChange={handleChange} rows={2} placeholder="מה התלמידים ידעו?" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
                       </div>
                       <div>
-                        <label htmlFor="skillGoals" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מטרות ברמת המיומנויות</label>
+                        <label htmlFor="skillGoals" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <span>מטרות ברמת המיומנויות</span>
+                            <AiSuggestionButton field="skillGoals" title="מטרות ברמת המיומנויות" />
+                        </label>
                         <textarea id="skillGoals" name="skillGoals" value={formData.skillGoals} onChange={handleChange} rows={2} placeholder="מה התלמידים יוכלו לעשות?" className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
                       </div>
                       <div>
-                        <label htmlFor="generalDescription" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">תיאור כללי</label>
+                        <label htmlFor="generalDescription" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <span>תיאור כללי</span>
+                             <AiSuggestionButton field="generalDescription" title="תיאור כללי" />
+                        </label>
                         <textarea id="generalDescription" name="generalDescription" value={formData.generalDescription} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
                       </div>
                   </div>
@@ -403,9 +433,9 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
               {/* Lesson Parts */}
                <h2 className="text-2xl font-bold text-pink-600 dark:text-pink-400 px-2 text-center">חלקי השיעור</h2>
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <LessonPartFormSection partName="opening" partLabel="פתיחה" formData={formData} handleChange={handleChange} />
-                    <LessonPartFormSection partName="main" partLabel="עיקר" formData={formData} handleChange={handleChange} />
-                    <LessonPartFormSection partName="summary" partLabel="סיכום" formData={formData} handleChange={handleChange} />
+                    <LessonPartFormSection partName="opening" partLabel="פתיחה" formData={formData} handleChange={handleChange} handleRequestSuggestion={handleRequestSuggestion} />
+                    <LessonPartFormSection partName="main" partLabel="עיקר" formData={formData} handleChange={handleChange} handleRequestSuggestion={handleRequestSuggestion} />
+                    <LessonPartFormSection partName="summary" partLabel="סיכום" formData={formData} handleChange={handleChange} handleRequestSuggestion={handleRequestSuggestion} />
                </div>
 
               {/* Additional Details & Legacy fields */}
@@ -481,6 +511,31 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                           <AiSuggestionButton field="inclusion" title="הכללה והתאמות" />
                         </label>
                         <textarea id="inclusion" name="inclusion" value={formData.inclusion} onChange={handleChange} rows={3} placeholder="הערות לגבי התאמת השיעור לתלמידים שונים." className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"></textarea>
+                      </div>
+                      <div>
+                        <label className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <span>חוויה אימרסיבית</span>
+                            <AiSuggestionButton field="immersiveExperience" title="חוויה אימרסיבית" />
+                        </label>
+                        <div className="space-y-3">
+                            <input
+                                type="text"
+                                name="immersiveExperienceTitle"
+                                value={formData.immersiveExperienceTitle || ''}
+                                onChange={handleChange}
+                                placeholder="כותרת לחוויה האימרסיבית"
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                            />
+                            <textarea
+                                id="immersiveExperienceDescription"
+                                name="immersiveExperienceDescription"
+                                value={formData.immersiveExperienceDescription || ''}
+                                onChange={handleChange}
+                                rows={3}
+                                placeholder="תיאור החוויה האימרסיבית..."
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                            ></textarea>
+                        </div>
                       </div>
                   </div>
                   </div>

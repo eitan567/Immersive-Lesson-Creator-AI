@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import type { LessonFormData, LessonPlan } from './types';
 import { generateLessonPlan } from './services/geminiService';
 import Dashboard from './components/Dashboard';
@@ -13,8 +13,18 @@ import { SettingsContext } from './contexts/SettingsContext';
 import ExportToCalendarModal from './components/ExportToCalendarModal';
 import CalendarIcon from './components/icons/CalendarIcon';
 import SendIcon from './components/icons/SendIcon';
+import DocumentArrowDownIcon from './components/icons/DocumentArrowDownIcon';
 import QuickCreatePage from './components/QuickCreatePage';
 import Header from './components/Header';
+import SupportChat from './components/SupportChat';
+import ChatBubbleIcon from './components/icons/ChatBubbleIcon';
+
+declare global {
+  interface Window {
+    jspdf: any;
+    html2canvas: any;
+  }
+}
 
 type AppView = 'landing' | 'dashboard' | 'form' | 'display' | 'loading' | 'settings' | 'quickForm';
 
@@ -31,6 +41,10 @@ const App: React.FC = () => {
     const [lessonToDelete, setLessonToDelete] = useState<string | null>(null);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const [lessonToExport, setLessonToExport] = useState<LessonPlan | null>(null);
+    const [isExportingPdf, setIsExportingPdf] = useState(false);
+    const [isSupportChatOpen, setIsSupportChatOpen] = useState(false);
+    
+    const lessonDisplayRef = useRef<HTMLDivElement>(null);
     
      useEffect(() => {
         const root = window.document.documentElement;
@@ -143,8 +157,8 @@ const App: React.FC = () => {
         setLessonToDelete(null);
     };
 
+    // FIX: Added the missing handleCancelDelete function to handle closing the confirmation modal.
     const handleCancelDelete = () => {
-        console.log(`[Delete] User cancelled deletion for lesson ID: ${lessonToDelete}`);
         setIsConfirmModalOpen(false);
         setLessonToDelete(null);
     };
@@ -166,6 +180,65 @@ const App: React.FC = () => {
     const handleExportLesson = (lesson: LessonPlan) => {
         setLessonToExport(lesson);
         setIsExportModalOpen(true);
+    };
+
+    const handleExportToPdf = async () => {
+        const element = lessonDisplayRef.current;
+        if (!element || !currentLesson) return;
+
+        setIsExportingPdf(true);
+        document.body.classList.add('pdf-export-active');
+
+        try {
+            // A small delay helps ensure CSS changes are applied before capture
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const canvas = await window.html2canvas(element, { 
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff', // Force a white background for consistency
+            });
+            const imgData = canvas.toDataURL('image/png');
+
+            const pdf = new window.jspdf.jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+
+            const ratio = canvasWidth / pdfWidth;
+            const imgHeight = canvasHeight / ratio;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+
+            while (heightLeft > 0) {
+                position -= pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfHeight;
+            }
+            
+            const filename = `${currentLesson.lessonTitle.replace(/[^a-zA-Z0-9\u0590-\u05FF]/g, '_')}.pdf`;
+
+            pdf.save(filename);
+        } catch (err) {
+            console.error("Error exporting to PDF", err);
+            setError("שגיאה בייצוא ל-PDF. נסה לרענן את הדף.");
+        } finally {
+            // Ensure the class is always removed
+            document.body.classList.remove('pdf-export-active');
+            setIsExportingPdf(false);
+        }
     };
 
     const handleSubmit = async (formData: LessonFormData) => {
@@ -257,6 +330,31 @@ const App: React.FC = () => {
         }
     };
 
+    const renderSupportChat = () => {
+        const supportChatViews: AppView[] = ['landing', 'dashboard', 'display', 'settings'];
+        if (!supportChatViews.includes(view)) {
+            return null;
+        }
+
+        return (
+            <>
+                {!isSupportChatOpen && (
+                    <button
+                        onClick={() => setIsSupportChatOpen(true)}
+                        className="fixed bottom-8 right-8 z-40 p-4 text-white rounded-full shadow-lg transition-transform transform hover:scale-110 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"
+                        title="פתח צ'אט תמיכה"
+                    >
+                        <ChatBubbleIcon className="w-8 h-8" />
+                    </button>
+                )}
+                <SupportChat
+                    isOpen={isSupportChatOpen}
+                    onClose={() => setIsSupportChatOpen(false)}
+                />
+            </>
+        )
+    }
+
     const renderContent = () => {
         const mainAppViews: AppView[] = ['dashboard', 'form', 'display', 'settings'];
         const isMainAppView = mainAppViews.includes(view);
@@ -304,6 +402,26 @@ const App: React.FC = () => {
                                     <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">תצוגת שיעור</h2>
                                     <div className="flex items-center gap-4">
                                         <button
+                                            onClick={handleExportToPdf}
+                                            disabled={isExportingPdf}
+                                            className="flex items-center gap-2 px-4 py-2 text-black dark:text-white text-sm font-semibold rounded-lg transition-colors bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isExportingPdf ? (
+                                                <>
+                                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    מייצא...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <DocumentArrowDownIcon className="w-5 h-5" />
+                                                    ייצא ל-PDF
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
                                             onClick={() => handleExportLesson(currentLesson)}
                                             className="flex items-center gap-2 px-4 py-2 text-black dark:text-white text-sm font-semibold rounded-lg transition-colors bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600"
                                         >
@@ -322,7 +440,7 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex-grow">
+                            <div className="flex-grow" ref={lessonDisplayRef}>
                                 <div className="container mx-auto">
                                     <LessonDisplay lessonPlan={currentLesson} />
                                 </div>
@@ -357,6 +475,7 @@ const App: React.FC = () => {
             return (
                  <div className="bg-gray-50 dark:bg-zinc-900 min-h-screen" dir="rtl">
                     <Header
+                        onNavigateHome={handleNavigateHome}
                         onNavigateToDashboard={handleNavigateToDashboard}
                         onNavigateToSettings={() => handleNavigate('settings')}
                     />
@@ -391,6 +510,7 @@ const App: React.FC = () => {
                 title="אישור מחיקה"
                 message="האם אתה בטוח שברצונך למחוק את השיעור? לא ניתן לשחזר פעולה זו."
              />
+             {renderSupportChat()}
         </div>
     );
 };

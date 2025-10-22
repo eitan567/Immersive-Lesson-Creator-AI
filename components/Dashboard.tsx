@@ -43,7 +43,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     return (
         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">מערכי השיעור שלי</h2>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">לוח בקרה</h2>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={onCreateQuick}

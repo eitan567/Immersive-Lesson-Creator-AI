@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
       // On page load or when changing themes, best to add inline in `head` to avoid FOUC.
       // This checks the saved setting in localStorage and the system preference.
@@ -121,27 +123,112 @@
         pointer-events: none;
       }
 
-
-      /* Custom CTA button style for dark mode */
-      /* .dark .btn-cta, .dark .div-cta {
-        border: 1px solid transparent;
-        background: linear-gradient(#18181b, #18181b) padding-box,
-                    linear-gradient(to right, #3b82f6, #ec4899, #a855f7) border-box;
-        color: #e2e8f0; 
-        transition: all 0.3s ease;
+      /* PDF Export Overrides */
+      .pdf-export-active .div-cta::before,
+      .pdf-export-active .btn-cta::before {
+        display: none !important;
       }
 
-      .dark .btn-cta:not(:disabled):hover {
-        filter: brightness(1.2);
-        box-shadow: 0 0 15px rgba(236, 72, 153, 0.4), 0 0 15px rgba(59, 130, 246, 0.4);
+      .pdf-export-active .div-cta,
+      .pdf-export-active .btn-cta {
+        border: 1px solid #d1d5db !important; /* gray-300 */
+        padding: 0 !important;
+      }
+
+      .pdf-export-active .shadow-md,
+      .pdf-export-active .shadow-lg {
+        box-shadow: none !important;
       }
       
-      .dark .btn-cta:disabled, .dark .btn-cta[disabled] {
-        background: #3f3f46;
-        border-color: #3f3f46;
-        opacity: 0.6;
-        cursor: not-allowed;
-      } */
+      .pdf-export-active .pdf-grid-cols-2 {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1.5rem !important;
+      }
+
+      .pdf-export-active .pdf-flex-header {
+        line-height: 1.2 !important;
+      }
+
+      .pdf-export-active .pdf-flex-header > * {
+        display: inline-block !important;
+        vertical-align: middle !important;
+      }
+      
+      .pdf-export-active .pdf-icon-wrapper {
+        background: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        /* Override Tailwind's ml-4 which causes clipping in html2canvas/rtl */
+        margin-right: 0 !important;
+        margin-left: 0.75rem !important; /* Create space between icon and text */
+      }
+      
+      .pdf-export-active .pdf-icon-wrapper svg {
+        position: relative !important;
+        top: 4px !important; /* Fine-tuned vertical alignment */
+        color: #db2777 !important;
+      }
+
+      .pdf-export-active .pdf-clock-container svg {
+        position: relative !important;
+        top: 2px !important; /* Fine-tuned vertical alignment */
+        color: #4b5563 !important;
+        vertical-align: middle !important;
+      }
+      
+      /* Robust Bullet Point Fix for RTL using background image */
+      .pdf-export-active ul.pdf-list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      
+      .pdf-export-active ul.pdf-list li {
+        padding-right: 1.5rem !important;
+        padding-left: 0 !important;
+        padding-bottom: 0.25rem !important;
+        /* Use a background image for the bullet to avoid RTL positioning bugs in html2canvas */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Ccircle cx='4' cy='4' r='4' fill='%234b5563'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.35em; /* Position on the right, and align vertically */
+        background-size: 6px 6px;
+      }
+
+      .pdf-export-active ul.pdf-list li::before {
+          content: none !important; /* Disable the old pseudo-element method */
+      }
+      
+      /* Force a light theme for PDF output regardless of user's theme */
+      .pdf-export-active .dark\:bg-zinc-950,
+      .pdf-export-active .dark\:bg-zinc-900,
+      .pdf-export-active .dark\:bg-zinc-800\/50,
+      .pdf-export-active .dark\:bg-zinc-900\/95,
+      .pdf-export-active .dark\:bg-pink-900\/50,
+      .pdf-export-active .dark\:bg-pink-800 {
+        background-color: #ffffff !important;
+      }
+
+      .pdf-export-active .dark\:text-gray-50,
+      .pdf-export-active .dark\:text-gray-100,
+      .pdf-export-active .dark\:text-gray-200,
+      .pdf-export-active .dark\:text-gray-300,
+      .pdf-export-active .dark\:text-gray-400 {
+        color: #4b5563 !important; /* gray-600 */
+      }
+      
+      .pdf-export-active .dark\:text-pink-300,
+      .pdf-export-active .dark\:text-pink-400 {
+        color: #db2777 !important; /* pink-600 */
+      }
+      
+      .pdf-export-active .dark\:border-zinc-800,
+      .pdf-export-active .dark\:border-pink-800,
+      .pdf-export-active .dark\:border-zinc-700 {
+          border-color: #e5e7eb !important; /* gray-200 */
+      }
     </style>
   <script type="importmap">
 {

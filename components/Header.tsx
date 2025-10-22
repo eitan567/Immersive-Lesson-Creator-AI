@@ -8,11 +8,13 @@ import MoonIcon from './icons/MoonIcon';
 
 
 interface HeaderProps {
+    onNavigateHome: () => void;
     onNavigateToDashboard: () => void;
     onNavigateToSettings: () => void;
+    
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigateToDashboard, onNavigateToSettings }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToDashboard, onNavigateToSettings }) => {
     const { setSettings } = useContext(SettingsContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -38,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigateToDashboard, onNavigateToSett
 
     const navLinks = (
         <>
-            <button onClick={() => handleNavigate(onNavigateToDashboard)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">לוח בקרה</button>
+            <button onClick={() => handleNavigate(onNavigateHome)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">דף הבית</button>
             <button onClick={() => handleNavigate(onNavigateToSettings)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">הגדרות</button>
             <a href="#" onClick={() => setIsMenuOpen(false)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">חומרי עזר</a>
             <a href="#" onClick={() => setIsMenuOpen(false)} className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-2 md:py-0">המלצות</a>
@@ -64,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigateToDashboard, onNavigateToSett
                     {/* Col 1: Logo */}
                     <div className="flex items-center cursor-pointer md:justify-self-start" onClick={() => handleNavigate(onNavigateToDashboard)}>
                         <BookOpenIcon className="w-8 h-8 text-pink-600 dark:text-pink-400 ml-3" />
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">יוצר השיעורים</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">לוח בקרה</h1>
                     </div>
 
                     {/* Col 2: Desktop Nav */}

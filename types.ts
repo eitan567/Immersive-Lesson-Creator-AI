@@ -57,7 +57,22 @@ export interface LessonPlan {
 }
 
 
-export type SuggestionField = 'topic' | 'objectives' | 'keyConcepts' | 'teachingStyle' | 'tone' | 'successMetrics' | 'inclusion' | 'immersiveExperience';
+export type SuggestionField = 
+  'topic' | 
+  'objectives' | 
+  'keyConcepts' | 
+  'teachingStyle' | 
+  'tone' | 
+  'successMetrics' | 
+  'inclusion' | 
+  'immersiveExperience' |
+  'priorKnowledge' |
+  'contentGoals' |
+  'skillGoals' |
+  'generalDescription' |
+  'openingContent' |
+  'mainContent' |
+  'summaryContent';
 
 export interface ChatSuggestion {
     field: SuggestionField;

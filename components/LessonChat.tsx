@@ -29,6 +29,7 @@ const MIN_HEIGHT = 400;
 const DEFAULT_WIDTH = 384;
 const DEFAULT_HEIGHT = 600;
 
+// FIX: Added all missing fields to `fieldTranslations` to fully conform to the `SuggestionField` type, resolving the compilation error.
 const fieldTranslations: Record<SuggestionField, string> = {
     topic: 'נושא השיעור',
     objectives: 'מטרות עיקריות',
@@ -38,6 +39,13 @@ const fieldTranslations: Record<SuggestionField, string> = {
     successMetrics: 'מדדי הצלחה',
     inclusion: 'הכללה והתאמות',
     immersiveExperience: 'חוויה אימרסיבית',
+    priorKnowledge: 'ידע קודם',
+    contentGoals: 'מטרות תוכן',
+    skillGoals: 'מטרות מיומנות',
+    generalDescription: 'תיאור כללי',
+    openingContent: 'תוכן פתיחה',
+    mainContent: 'תוכן עיקרי',
+    summaryContent: 'תוכן סיכום',
 };
 
 const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUpdateForm }) => {
