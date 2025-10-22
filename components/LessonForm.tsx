@@ -36,7 +36,7 @@ const defaultFormData: LessonFormData = {
 
   // New optional fields
   priorKnowledge: '',
-  placementInContent: PLACEMENT_IN_CONTENT_OPTIONS[0],
+  placementInContent: '',
   contentGoals: '',
   skillGoals: '',
   generalDescription: '',
@@ -61,13 +61,13 @@ const defaultFormData: LessonFormData = {
 
   // Original fields
   topic: '',
-  gradeLevel: GRADE_LEVELS[3],
+  gradeLevel: '',
   duration: '45',
   objectives: '',
   keyConcepts: '',
   file: null,
-  teachingStyle: TEACHING_STYLES[0],
-  tone: TONES[0],
+  teachingStyle: '',
+  tone: '',
   successMetrics: '',
   inclusion: '',
   immersiveExperienceTitle: '',
@@ -331,7 +331,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
     </button>
   );
   
-  const chatButtonClasses = `fixed bottom-8 text-black dark:text-white p-4 rounded-full shadow-lg transition-transform transform hover:scale-110 z-40 ${settings.chatPosition === 'left' ? 'left-8' : 'right-8'}`;
+  const chatButtonClasses = `fixed bottom-8 text-white p-2 rounded-full shadow-lg transition-transform transform hover:scale-110 z-40 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 ${settings.chatPosition === 'left' ? 'left-8' : 'right-8'}`;
 
   const isPinnedAndOpen = settings.isChatPinned && isChatOpen;
   const isEditing = !!initialData;
@@ -376,16 +376,16 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                   <div className="space-y-6">
                       <div>
                         <label htmlFor="category" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">קטגוריה <span className="text-red-500">*</span></label>
-                        <CustomSelect id="category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} className="bg-gray-50 dark:bg-zinc-800" required />
+                        <CustomSelect id="category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} className="bg-gray-50 dark:bg-zinc-800" required placeholder="בחרו קטגוריה..." />
                       </div>
                       <div>
                         <label htmlFor="unitTopic" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">נושא היחידה <span className="text-red-500">*</span></label>
-                        <input type="text" id="unitTopic" name="unitTopic" value={formData.unitTopic} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required />
+                        <input type="text" id="unitTopic" name="unitTopic" value={formData.unitTopic} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required placeholder="לדוגמה: מבוא לאלגברה, המהפכה הצרפתית" />
                       </div>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
                             <label htmlFor="gradeLevel" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">שכבת גיל</label>
-                            <CustomSelect id="gradeLevel" name="gradeLevel" value={formData.gradeLevel} onChange={handleChange} options={GRADE_LEVELS} className="bg-gray-50 dark:bg-zinc-800" />
+                            <CustomSelect id="gradeLevel" name="gradeLevel" value={formData.gradeLevel} onChange={handleChange} options={GRADE_LEVELS} className="bg-gray-50 dark:bg-zinc-800" placeholder="בחרו שכבת גיל..." />
                           </div>
                           <div>
                             <label htmlFor="duration" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">זמן כולל (בדקות)</label>
@@ -394,7 +394,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                         </div>
                          <div>
                             <label htmlFor="placementInContent" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">מיקום בתוכן</label>
-                            <CustomSelect id="placementInContent" name="placementInContent" value={formData.placementInContent || ''} onChange={handleChange} options={PLACEMENT_IN_CONTENT_OPTIONS} className="bg-gray-50 dark:bg-zinc-800" />
+                            <CustomSelect id="placementInContent" name="placementInContent" value={formData.placementInContent || ''} onChange={handleChange} options={PLACEMENT_IN_CONTENT_OPTIONS} className="bg-gray-50 dark:bg-zinc-800" placeholder="בחרו מיקום ברצף הלמידה..." />
                         </div>
                   </div>
                   <div className="space-y-6">
@@ -403,7 +403,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                             <span>ידע קודם נדרש</span>
                             <AiSuggestionButton field="priorKnowledge" title="ידע קודם נדרש" />
                         </label>
-                        <textarea id="priorKnowledge" name="priorKnowledge" value={formData.priorKnowledge} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
+                        <textarea id="priorKnowledge" name="priorKnowledge" value={formData.priorKnowledge} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" placeholder="מה התלמידים צריכים לדעת לפני השיעור?"></textarea>
                       </div>
                       <div>
                         <label htmlFor="contentGoals" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -424,7 +424,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                             <span>תיאור כללי</span>
                              <AiSuggestionButton field="generalDescription" title="תיאור כללי" />
                         </label>
-                        <textarea id="generalDescription" name="generalDescription" value={formData.generalDescription} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100"></textarea>
+                        <textarea id="generalDescription" name="generalDescription" value={formData.generalDescription} onChange={handleChange} rows={2} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" placeholder="תארו בקצרה את מהלך השיעור והפעילויות המרכזיות."></textarea>
                       </div>
                   </div>
                 </div>
@@ -489,14 +489,14 @@ const LessonForm: React.FC<LessonFormProps> = ({ onSubmit, isLoading, error, ini
                           <span>סגנון הוראה</span>
                           <AiSuggestionButton field="teachingStyle" title="סגנון הוראה" />
                         </label>
-                        <CustomSelect id="teachingStyle" name="teachingStyle" value={formData.teachingStyle || ''} onChange={handleChange} options={TEACHING_STYLES} className="bg-gray-50 dark:bg-zinc-800" />
+                        <CustomSelect id="teachingStyle" name="teachingStyle" value={formData.teachingStyle || ''} onChange={handleChange} options={TEACHING_STYLES} className="bg-gray-50 dark:bg-zinc-800" placeholder="בחרו סגנון הוראה..." />
                       </div>
                       <div>
                         <label htmlFor="tone" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
                           <span>טון השיעור</span>
                           <AiSuggestionButton field="tone" title="טון השיעור" />
                         </label>
-                        <CustomSelect id="tone" name="tone" value={formData.tone || ''} onChange={handleChange} options={TONES} className="bg-gray-50 dark:bg-zinc-800" />
+                        <CustomSelect id="tone" name="tone" value={formData.tone || ''} onChange={handleChange} options={TONES} className="bg-gray-50 dark:bg-zinc-800" placeholder="בחרו טון לשיעור..." />
                       </div>
                       <div>
                         <label htmlFor="successMetrics" className="flex items-center gap-2 text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">

@@ -18,7 +18,7 @@ const QuickCreatePage: React.FC<QuickCreatePageProps> = ({ onSubmit, isLoading, 
     topic: '',
     category: '',
     unitTopic: '',
-    gradeLevel: GRADE_LEVELS[3],
+    gradeLevel: '',
     file: null as File | null,
     duration: '45',
   });
@@ -79,11 +79,11 @@ const QuickCreatePage: React.FC<QuickCreatePageProps> = ({ onSubmit, isLoading, 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="quick-page-category" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">קטגוריה <span className="text-red-500">*</span></label>
-                        <CustomSelect id="quick-page-category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} className="bg-gray-50 dark:bg-zinc-800" required />
+                        <CustomSelect id="quick-page-category" name="category" value={formData.category} onChange={handleChange} options={CATEGORIES} className="bg-gray-50 dark:bg-zinc-800" required placeholder="בחרו קטגוריה..." />
                     </div>
                     <div>
                         <label htmlFor="quick-page-unitTopic" className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">נושא היחידה <span className="text-red-500">*</span></label>
-                        <input type="text" id="quick-page-unitTopic" name="unitTopic" value={formData.unitTopic} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required />
+                        <input type="text" id="quick-page-unitTopic" name="unitTopic" value={formData.unitTopic} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors text-gray-900 dark:text-gray-100" required placeholder="לדוגמה: מבוא לאלגברה" />
                     </div>
                 </div>
                 <div>
@@ -134,6 +134,7 @@ const QuickCreatePage: React.FC<QuickCreatePageProps> = ({ onSubmit, isLoading, 
                             onChange={handleChange}
                             options={GRADE_LEVELS}
                             className="bg-gray-50 dark:bg-zinc-800"
+                            placeholder="בחרו שכבת גיל..."
                         />
                     </div>
                     <div>

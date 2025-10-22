@@ -453,19 +453,46 @@ const chatResponseSchema = {
             properties: {
                 field: {
                     type: Type.STRING,
-                    enum: ['topic', 'objectives', 'keyConcepts', 'teachingStyle', 'tone', 'successMetrics', 'inclusion'],
-                    description: "השדה עבורו ניתנות ההצעות."
+                    enum: [
+                        'topic', 'objectives', 'keyConcepts', 'teachingStyle', 'tone', 
+                        'successMetrics', 'inclusion', 'immersiveExperience', 'priorKnowledge', 'contentGoals', 
+                        'skillGoals', 'generalDescription', 'openingContent', 
+                        'mainContent', 'summaryContent'
+                    ],
+                    description: "מפתח השדה באנגלית עבורו ניתנות ההצעות."
+                },
+                fieldName: {
+                    type: Type.STRING,
+                    description: "שם השדה המלא והמדויק בעברית, כפי שמופיע בטופס."
                 },
                 values: {
                     type: Type.ARRAY,
                     items: { type: Type.STRING },
                     description: "מערך של 3 הצעות טקסט קצרות."
                 }
-            }
+            },
+            required: ['field', 'fieldName', 'values']
         }
     }
 };
 
+const fullFieldNames: Record<SuggestionField, string> = {
+    topic: 'נושא השיעור (כותרת כללית)',
+    objectives: 'מטרות עיקריות',
+    keyConcepts: 'מושגי מפתח',
+    teachingStyle: 'סגנון הוראה',
+    tone: 'טון השיעור',
+    successMetrics: 'מדדי הצלחה',
+    inclusion: 'הכללה והתאמות',
+    immersiveExperience: 'חוויה אימרסיבית',
+    priorKnowledge: 'ידע קודם נדרש',
+    contentGoals: 'מטרות ברמת התוכן',
+    skillGoals: 'מטרות ברמת המיומנויות',
+    generalDescription: 'תיאור כללי',
+    openingContent: 'תוכן פתיחה',
+    mainContent: 'תוכן עיקר',
+    summaryContent: 'תוכן סיכום'
+};
 
 export const chatWithLessonAssistant = async (message: string, context: LessonFormData): Promise<Partial<ChatMessage>> => {
     if (!process.env.API_KEY) {
@@ -478,12 +505,24 @@ export const chatWithLessonAssistant = async (message: string, context: LessonFo
         התפקיד שלך הוא לסייע למורה שיוצר/ת שיעור.
         התשובות שלך חייבות להיות בעברית בלבד.
 
+        --- שמות השדות האפשריים בטופס (מפתח באנגלית, שם מלא בעברית) ---
+        ${Object.entries(fullFieldNames).map(([key, value]) => `- ${key}: "${value}"`).join('\n')}
+        ---
+
         --- הקשר השיעור הנוכחי (ייתכן שחלק מהשדות ריקים) ---
-        נושא: ${context.topic || 'לא הוגדר'}
+        קטגוריה: ${context.category || 'לא הוגדר'}
+        נושא היחידה: ${context.unitTopic || 'לא הוגדר'}
         שכבת גיל: ${context.gradeLevel || 'לא הוגדר'}
-        מטרות: ${context.objectives || 'לא הוגדר'}
-        מושגי מפתח: ${context.keyConcepts || 'לא הוגדר'}
+        ידע קודם: ${context.priorKnowledge || 'לא הוגדר'}
+        מיקום בתוכן: ${context.placementInContent || 'לא הוגדר'}
+        מטרות תוכן: ${context.contentGoals || 'לא הוגדר'}
+        מטרות מיומנות: ${context.skillGoals || 'לא הוגדר'}
+        תיאור כללי: ${context.generalDescription || 'לא הוגדר'}
+        תוכן פתיחה: ${context.openingContent || 'לא הוגדר'}
+        תוכן עיקרי: ${context.mainContent || 'לא הוגדר'}
+        תוכן סיכום: ${context.summaryContent || 'לא הוגדר'}
         סגנון הוראה: ${context.teachingStyle || 'לא הוגדר'}
+        טון: ${context.tone || 'לא הוגדר'}
         ---
 
         המשתמש שאל: "${message}"
@@ -491,7 +530,12 @@ export const chatWithLessonAssistant = async (message: string, context: LessonFo
         --- הנחיות לתגובה ---
         1.  נתח את שאלת המשתמש. האם זו שאלה כללית או בקשה להצעות עבור שדה ספציפי בטופס?
         2.  **אם זו שאלה כללית:** ענה תשובה מועילה ותמציתית. החזר JSON עם שדה "text" בלבד.
-        3.  **אם זו בקשה להצעות לשדה מסוים (למשל "תן לי רעיונות למטרות"):** זהה את השדה המבוקש (למשל, 'objectives'). צור 3 הצעות קצרות ורלוונטיות. החזר JSON עם שדה "suggestions" בלבד.
+        3.  **אם זו בקשה להצעות לשדה מסוים (למשל "תן לי רעיונות למטרות"):**
+            - זהה לאיזה שדה מהרשימה למעלה המשתמש מתכוון.
+            - החזר את **מפתח השדה באנגלית** בשדה 'field'.
+            - החזר את **השם המלא והמדויק של השדה בעברית** מהרשימה בשדה 'fieldName'. זה קריטי להשתמש בשם המלא והמדויק. לדוגמה, אם המשתמש ביקש "ידע קודם", השתמש ב-"ידע קודם נדרש".
+            - צור 3 הצעות קצרות ורלוונטיות בהתבסס על הקשר השיעור שסופק.
+            - החזר JSON עם אובייקט "suggestions" המכיל את 'field', 'fieldName', ו-'values'.
         4.  התשובה שלך חייבת להיות אובייקט JSON שתואם לסכמה שסופקה.
     `;
 

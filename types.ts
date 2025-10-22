@@ -76,6 +76,7 @@ export type SuggestionField =
 
 export interface ChatSuggestion {
     field: SuggestionField;
+    fieldName: string;
     values: string[];
 }
 

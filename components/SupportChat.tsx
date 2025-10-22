@@ -66,7 +66,7 @@ const SupportChat: React.FC<SupportChatProps> = ({ isOpen, onClose }) => {
     
     const ChatContent = (
         <>
-            <header className="relative flex items-center justify-between p-4 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
+            <header className="relative flex items-center justify-between p-4 bg-white dark:bg-zinc-800">
                 <div className="flex items-center gap-2">
                     <LifebuoyIcon className="w-6 h-6 text-blue-500 dark:text-blue-400" />
                     <h3 className="text-lg font-bold text-gray-800 dark:text-white">תמיכה ועזרה</h3>
@@ -74,9 +74,11 @@ const SupportChat: React.FC<SupportChatProps> = ({ isOpen, onClose }) => {
                 <button onClick={onClose} className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white">
                     <XIcon className="w-6 h-6" />
                 </button>
+                {/* Subtle gradient accent */}
+                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
             </header>
 
-            <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-white dark:bg-zinc-900">
+            <div className="flex-1 p-2 overflow-y-auto space-y-4 bg-white dark:bg-zinc-900">
                 {chatHistory.map((msg, index) => (
                     <div 
                         key={index} 
@@ -157,7 +159,7 @@ const SupportChat: React.FC<SupportChatProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     
     // Desktop: Bottom right corner, fixed size. No dragging/resizing for simplicity.
-    const chatContainerClasses = `fixed bottom-8 right-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-blue-400 dark:border-zinc-700 transition-transform duration-300 ease-in-out`;
+    const chatContainerClasses = `fixed bottom-8 right-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-pink-400 dark:border-zinc-700 transition-transform duration-300 ease-in-out`;
     
     return (
        <>

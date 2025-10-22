@@ -341,7 +341,7 @@ const App: React.FC = () => {
                 {!isSupportChatOpen && (
                     <button
                         onClick={() => setIsSupportChatOpen(true)}
-                        className="fixed bottom-8 right-8 z-40 p-4 text-white rounded-full shadow-lg transition-transform transform hover:scale-110 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"
+                        className="fixed bottom-8 right-8 z-40 p-2 text-white rounded-full shadow-lg transition-transform transform hover:scale-110 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500"
                         title="פתח צ'אט תמיכה"
                     >
                         <ChatBubbleIcon className="w-8 h-8" />

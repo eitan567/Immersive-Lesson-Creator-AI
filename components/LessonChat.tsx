@@ -29,25 +29,6 @@ const MIN_HEIGHT = 400;
 const DEFAULT_WIDTH = 384;
 const DEFAULT_HEIGHT = 600;
 
-// FIX: Added all missing fields to `fieldTranslations` to fully conform to the `SuggestionField` type, resolving the compilation error.
-const fieldTranslations: Record<SuggestionField, string> = {
-    topic: 'נושא השיעור',
-    objectives: 'מטרות עיקריות',
-    keyConcepts: 'מושגי מפתח',
-    teachingStyle: 'סגנון הוראה',
-    tone: 'טון השיעור',
-    successMetrics: 'מדדי הצלחה',
-    inclusion: 'הכללה והתאמות',
-    immersiveExperience: 'חוויה אימרסיבית',
-    priorKnowledge: 'ידע קודם',
-    contentGoals: 'מטרות תוכן',
-    skillGoals: 'מטרות מיומנות',
-    generalDescription: 'תיאור כללי',
-    openingContent: 'תוכן פתיחה',
-    mainContent: 'תוכן עיקרי',
-    summaryContent: 'תוכן סיכום',
-};
-
 const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUpdateForm }) => {
     const { settings, setSettings } = useContext(SettingsContext);
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
@@ -224,7 +205,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
     const ChatContent = (
         <>
             <header 
-                className={`relative flex items-center p-4 bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 
+                className={`relative flex items-center p-4 bg-white dark:bg-zinc-800 
                 ${!settings.isChatPinned && settings.isChatFloating ? 'md:cursor-grab' : ''}
                 ${!settings.isChatPinned ? 'justify-between' : 'justify-center'}`}
                 onMouseDown={!settings.isChatPinned ? (e) => { if (window.innerWidth >= 768) handleMouseDown(e) } : undefined}
@@ -278,6 +259,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                         </div>
                     </>
                 )}
+                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"></div>
             </header>
 
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-white dark:bg-zinc-900">
@@ -295,7 +277,7 @@ const LessonChat: React.FC<LessonChatProps> = ({ isOpen, onClose, formData, onUp
                             {msg.text && <p>{msg.text}</p>}
                             {msg.suggestions && (
                                 <div>
-                                    <p className={`mb-2 ${settings.isChatPinned ? 'font-semibold text-sm' : 'font-semibold'}`}>מצאתי כמה רעיונות עבור "{fieldTranslations[msg.suggestions.field]}":</p>
+                                    <p className={`mb-2 ${settings.isChatPinned ? 'font-semibold text-sm' : 'font-semibold'}`}>מצאתי כמה רעיונות עבור "{msg.suggestions.fieldName}":</p>
                                     <div className="space-y-2">
                                         {msg.suggestions.values.map((value, i) => (
                                             <button
